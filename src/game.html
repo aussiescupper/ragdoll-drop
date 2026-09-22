@@ -493,7 +493,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v42</div>
+<div id="verTag">v43</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v42</p>
+    <p class="home-ver" id="homeVer">v43</p>
   </div>
 </section>
 
@@ -4565,6 +4565,44 @@ function canCheckRound(){
 /* d.hit is cleared on every substep, so this has to be read inside the
    substep loop: once a frame and the big impact is long gone, overwritten
    by whatever gentler thing he brushed against next. */
+/* He is thrown hard enough to cross most of a block between one physics
+   step and the next, and the tower is mostly fresh air — two thin uprights
+   and a slab per floor — so he could thread straight through it. Sweep the
+   line each joint travelled against the blocks and catch what the step
+   test steps over. */
+var CAN_SWEEP = [HEAD, NECK, HIP, HPL, HPR];
+function canSweepHit(){
+  var d = cannonNoob;
+  if(!d || cannonState !== 'fly') return;
+  for(var s=0;s<CAN_SWEEP.length;s++){
+    var p = d.P[CAN_SWEEP[s]];
+    var dx = p.x - p.px, dy = p.y - p.py, dz = p.z - p.pz;
+    var L = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    if(L < 0.22) continue;                       /* the step test has this */
+    var ux = dx/L, uy = dy/L, uz = dz/L;
+    for(var k=0;k<cannonBlocks.length;k++){
+      var b = cannonBlocks[k];
+      if(b.down) continue;
+      var t = rayHit(b.part, p.px, p.py, p.pz, ux, uy, uz, L);
+      if(t < 0) continue;
+      var speed = L / FIXED;
+      /* stop him at the face instead of letting him carry on through it */
+      var back = Math.max(0, t - 0.08);
+      p.x = p.px + ux * back;
+      p.y = p.py + uy * back;
+      p.z = p.pz + uz * back;
+      p.px = p.x - ux * L * 0.25;
+      p.py = p.y - uy * L * 0.25;
+      p.pz = p.z - uz * L * 0.25;
+      if(speed > b.tough){
+        canTopple(b, ux * speed * 0.16, Math.min(0.5, uy * speed * 0.12),
+                  Math.max(-5, Math.min(5, ux * speed * 0.10)));
+        shake = Math.min(shake + 0.3, 1);
+      }
+      break;
+    }
+  }
+}
 function canHitCheck(){
   var d = cannonNoob;
   if(!d || !d.hit || !d.hit.part || d.hit.speed < 5) return;
@@ -4588,6 +4626,7 @@ function stepCannon(dt){
   var n = 0;
   while(acc >= FIXED && n < 6){
     for(var i=0;i<dummies.length;i++) stepDummy(dummies[i]);
+    canSweepHit();
     canHitCheck();
     acc -= FIXED; n++;
   }
