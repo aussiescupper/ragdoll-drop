@@ -1,0 +1,17 @@
+{
+  "name": "Ragdoll Drop",
+  "short_name": "Ragdoll",
+  "description": "Four ways to break a blocky noob: leap off a tower, slice a roomful of them, kit two out for the colosseum, or steer him through a story with eighteen endings.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#151A26",
+  "theme_color": "#151A26",
+  "categories": ["games", "kids"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
