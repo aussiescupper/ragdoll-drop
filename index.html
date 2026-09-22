@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v43</div>
+<div id="verTag">v44</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -541,7 +541,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v43</p>
+    <p class="home-ver" id="homeVer">v44</p>
   </div>
 </section>
 
@@ -4248,11 +4248,7 @@ function buildCannonTower(n){
     y += 4.42;
     cannonFloorY.push(y);
   }
-  /* a chimney of small blocks on the roof, worth knocking off */
-  for(var c=0;c<2+Math.min(3, n);c++){
-    canAddBlock('brick', CAN_TOWER_X + (c % 2 ? 0.35 : -0.35), y + 0.9 + c*1.7, 0.9, 0.85, 0.9, '#8E4136', 6);
-  }
-  cannonTopY = y + 0.9 + (1 + Math.min(3, n)) * 1.7 + 0.85;
+  cannonTopY = y + 1;                 /* the roof slab is the top of it */
   cannonTotal = cannonBlocks.length;
   cannonTarget = Math.max(3, Math.round(cannonTotal * Math.min(0.86, 0.5 + n * 0.045)));
 }
