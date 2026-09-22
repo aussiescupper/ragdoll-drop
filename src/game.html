@@ -493,7 +493,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v45</div>
+<div id="verTag">v46</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v45</p>
+    <p class="home-ver" id="homeVer">v46</p>
   </div>
 </section>
 
@@ -4287,10 +4287,14 @@ function buildCannonScene(n){
   clearLevel();
   theme = CAN_THEME;
   applyTheme(theme);
+  applyLights(LIGHT_ARENA);           /* rather than inherit the last mode's */
   setSky(['#2F72B8', '#79B0DE', '#DCE9F4']);
   setGround(['#8FA65E', '#7E9450']);
   hemi.color.set('#CFE2F2'); hemi.groundColor.set('#5E7038');
   scene.fog.color.setHex(0xAFC4D4);
+  /* the range is open ground in daylight: push the fog past anything you can
+     see, so the grass stays green all the way out instead of hazing over */
+  scene.fog.near = 900; scene.fog.far = 2400;
   TOP = 30; arenaR = 60; arenaCeil = 60;
   /* the launch platform, and a back wall so nothing sails off into nothing */
   addPart('deck', CAN_LAUNCH.x, 2.6, 0, 3.2, 2.6, 3.2, 0, '#6E6A5E');
