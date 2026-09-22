@@ -50,7 +50,7 @@ body{
   overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;
 }
 #stage{position:fixed;inset:0;z-index:0}
-#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;outline:none}
 #stage canvas:active{cursor:grabbing}
 
 /* ---------- shared chunky brick surfaces ---------- */
@@ -354,6 +354,18 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 .foe-chip.down b{text-decoration:line-through}
 .foe-meter{display:block;height:5px;border-radius:999px;background:#0A0E14;overflow:hidden}
 .foe-meter i{display:block;height:100%;background:linear-gradient(90deg,#E8564B,#FF8A7E);transition:width .12s linear}
+#fpsTags{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.foe-tag{position:absolute;transform:translate(-50%,-100%);display:grid;gap:3px;justify-items:center;
+  background:rgba(12,16,24,.72);border:2px solid rgba(255,255,255,.10);border-radius:9px;
+  padding:4px 9px 5px;white-space:nowrap;will-change:transform,left,top}
+.foe-tag .tag-name{font-family:var(--body);font-weight:900;font-size:12px;color:var(--cream);
+  text-shadow:0 1px 3px rgba(0,0,0,.8);line-height:1}
+.foe-tag .tag-stat{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);line-height:1}
+.foe-tag .tag-stat b{color:var(--coin);font-family:var(--display);font-size:11px;letter-spacing:0}
+.foe-tag .tag-hp{display:block;width:100%;height:4px;border-radius:999px;background:#0A0E14;overflow:hidden}
+.foe-tag .tag-hp i{display:block;height:100%;background:linear-gradient(90deg,#E8564B,#FF8A7E)}
+.foe-tag.down{opacity:.45}
+.foe-tag.down .tag-name{text-decoration:line-through}
 .fps-bar{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:9px;
   background:rgba(21,26,38,.78);border:2px solid rgba(255,255,255,.08);border-radius:11px;padding:8px 13px}
 .fps-left{left:calc(14px + env(safe-area-inset-left,0px))}
@@ -380,7 +392,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   box-shadow:var(--stud-sm);font-family:var(--body);color:var(--cream)}
 .foe-card:hover{background:#2C3547}
 .foe-card.on{background:var(--cream);color:#151A26;border-color:rgba(0,0,0,.2);box-shadow:0 3px 0 rgba(0,0,0,.35)}
-.foe-swatch{width:26px;height:26px;border-radius:7px;flex:0 0 auto;border:2px solid rgba(0,0,0,.28)}
+.foe-swatch{width:40px;height:49px;flex:0 0 auto;background-repeat:no-repeat;background-size:contain;background-position:center;image-rendering:pixelated}
 .foe-body{flex:1;display:grid;gap:2px;min-width:0}
 .foe-body b{font-size:13.5px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .foe-body small{font-size:10.5px;font-weight:800;color:var(--muted)}
@@ -390,6 +402,9 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 .foe-card.on .foe-skill b{color:#B07A00}
 .foe-skill small{font-size:9px;color:var(--coin);letter-spacing:.06em}
 .foe-card.on .foe-skill small{color:#B07A00}
+.fps-howto{margin:0 0 11px;padding:9px 12px;border-radius:10px;background:var(--ink-2);
+  border:2px solid rgba(255,255,255,.07);font-size:11.5px;font-weight:800;line-height:1.5;color:var(--cream)}
+.fps-howto b{color:var(--coin)}
 #fpsTripleBtn[aria-pressed="true"]{background:var(--mint);color:#06231D;border-color:rgba(0,0,0,.22);box-shadow:0 3px 0 #17796A}
 </style>
 
@@ -438,7 +453,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v34</div>
+<div id="verTag">v35</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -459,7 +474,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v34</p>
+    <p class="home-ver" id="homeVer">v35</p>
   </div>
 </section>
 
@@ -503,6 +518,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 <div id="fpsHud" hidden>
   <div id="fpsHurt"></div>
   <div id="fpsFoes"></div>
+  <div id="fpsTags"></div>
   <div id="fpsCross"></div>
   <div class="fps-bar fps-left">
     <span class="fps-lab">Health</span>
@@ -528,6 +544,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 
 <section id="fpsSheet" class="sheet" hidden aria-labelledby="fpsTitle">
   <h2 id="fpsTitle">Pick your fight</h2>
+  <p class="fps-howto" id="fpsHowto"></p>
   <p class="sub" id="fpsPickSub"></p>
   <div id="fpsRoster" class="foe-list"></div>
   <div class="row" style="margin-top:14px">
@@ -3142,10 +3159,42 @@ function fpsAim(dyaw, dpitch){
   fpsMe.yaw -= dyaw;
   fpsMe.pitch = Math.max(-0.95, Math.min(0.95, fpsMe.pitch - dpitch));
 }
+function fpsGrabKeys(){
+  /* in an iframe the keys go to whoever has focus, so take it */
+  try {
+    var c = renderer.domElement;
+    if(!c.hasAttribute('tabindex')) c.setAttribute('tabindex', '0');
+    c.focus({ preventScroll:true });
+    if(window.focus) window.focus();
+  } catch(e){}
+}
 function fpsExitLock(){
   try { if(document.pointerLockElement) document.exitPointerLock(); } catch(e){}
 }
 
+/* a little standing noob in his own colours, drawn the way he is built:
+   head with a face on it, torso, two arms, two legs */
+function fpsAvatarURL(skin){
+  var W = 72, H = 88, c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  var g = c.getContext('2d');
+  function box(col, x, y, w, h){
+    g.fillStyle = col; g.fillRect(x, y, w, h);
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x + w - 4, y, 4, h);
+  }
+  box(skin.a, 8, 36, 11, 26);        /* far arm */
+  box(skin.a, 53, 36, 11, 26);       /* near arm */
+  box(skin.l, 23, 62, 12, 22);       /* legs */
+  box(skin.l, 37, 62, 12, 22);
+  box(skin.t, 21, 36, 30, 28);       /* torso */
+  box(skin.h, 18, 4, 36, 30);        /* head */
+  g.save();
+  /* drawFaceOn works in a 128 square, so scale it onto the head */
+  g.translate(18, 4); g.scale(36/128, 30/128);
+  drawFaceOn(g, 'smile');
+  g.restore();
+  return c.toDataURL();
+}
 function fpsSkinFor(skill){
   /* the nastier ones wear darker kit, so a glance across the sand tells you
      which of them you should be worried about */
@@ -3268,7 +3317,17 @@ function fpsAddPickup(key, x, z){
   var m = makeGunMesh(key);
   m.position.set(x, 1.0, z);
   scene.add(m);
-  fpsPickups.push({ key:key, mesh:m, x:x, z:z, t:Math.random()*6, gone:0 });
+  var p = { key:key, mesh:m, x:x, z:z, t:Math.random()*6, gone:0, dropped:false };
+  fpsPickups.push(p);
+  return p;
+}
+/* what a dead noob was carrying stays on the sand where he fell, and unlike
+   the ones that spawn there, it does not come back once somebody takes it */
+function fpsDropGun(key, x, z){
+  if(!key || key === 'fist') return;
+  var p = fpsAddPickup(key, x, z);
+  p.dropped = true;
+  p.t = 0;
 }
 function fpsScatterPickups(){
   fpsClearPickups();
@@ -3295,8 +3354,13 @@ function fpsStepPickups(dt){
     var dx = fpsMe.x - p.x, dz = fpsMe.z - p.z;
     if(fpsMe.alive && dx*dx + dz*dz < 2.9){
       fpsTake(p.key);
-      p.mesh.visible = false;
-      p.gone = 11;
+      if(p.dropped){
+        scene.remove(p.mesh);
+        fpsPickups.splice(i, 1); i--;
+      } else {
+        p.mesh.visible = false;
+        p.gone = 11;
+      }
     }
   }
 }
@@ -3460,6 +3524,7 @@ function fpsKillFoe(d, fromMe){
   d.dead = true; d.deadT = -1e6;
   d.poseArm = null; d.walking = false; d.leadX = 0; d.leadZ = 0;
   if(F.wmesh){ scene.remove(F.wmesh); F.wmesh = null; }
+  fpsDropGun(F.gun, d.P[HIP].x, d.P[HIP].z);
   if(fromMe){
     fpsMe.kills++;
     var bounty = 60 + F.skill * 6;
@@ -3539,6 +3604,7 @@ function fpsSpawnFoe(info, i, n){
     wmesh:makeGunMesh(info.gun)
   };
   if(d.fp.wmesh) scene.add(d.fp.wmesh);
+  fpsMakeTag(d.fp);
   fpsFoes.push(d);
   return d;
 }
@@ -3658,6 +3724,48 @@ function fpsFlash(txt, secs){
   el.textContent = txt; el.hidden = false;
   fpsMsgT = secs;
 }
+var _tagV = new THREE.Vector3();
+function fpsMakeTag(F){
+  var el = document.createElement('div');
+  el.className = 'foe-tag';
+  var nm = document.createElement('span');
+  nm.className = 'tag-name'; nm.textContent = F.name;
+  var st = document.createElement('span');
+  st.className = 'tag-stat';
+  st.innerHTML = F.rank + ' \u00b7 <b>' + F.skill + '</b> \u00b7 ' + GUNS[F.gun].name;
+  var hp = document.createElement('span');
+  hp.className = 'tag-hp';
+  var fill = document.createElement('i');
+  hp.appendChild(fill);
+  el.appendChild(nm); el.appendChild(st); el.appendChild(hp);
+  F.tagEl = el; F.tagFill = fill;
+  $('fpsTags').appendChild(el);
+}
+function fpsClearTags(){ $('fpsTags').textContent = ''; }
+/* project each head to the screen so the tag rides above him */
+function fpsPlaceTags(){
+  for(var i=0;i<fpsFoes.length;i++){
+    var d = fpsFoes[i], F = d.fp, el = F.tagEl;
+    if(!el) continue;
+    var h = d.headOff ? d.P[NECK] : d.P[HEAD];
+    _tagV.set(h.x, h.y + 1.35, h.z);
+    _tagV.project(camera);
+    if(_tagV.z > 1 || _tagV.x < -1.25 || _tagV.x > 1.25 || _tagV.y < -1.25 || _tagV.y > 1.3){
+      el.style.display = 'none';
+      continue;
+    }
+    var dx = h.x - camera.position.x, dy = h.y - camera.position.y, dz = h.z - camera.position.z;
+    var dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    el.style.display = '';
+    el.style.left = ((_tagV.x * 0.5 + 0.5) * W).toFixed(1) + 'px';
+    el.style.top = ((-_tagV.y * 0.5 + 0.5) * H).toFixed(1) + 'px';
+    /* shrink with distance so a far-off one does not shout over the near one */
+    var sc = Math.max(0.55, Math.min(1, 22 / Math.max(6, dist)));
+    el.style.transform = 'translate(-50%,-100%) scale(' + sc.toFixed(2) + ')';
+    el.classList.toggle('down', !F.alive);
+    F.tagFill.style.width = Math.max(0, Math.min(100, F.hp / F.maxHp * 100)) + '%';
+  }
+}
 function fpsPaintRoster(){
   var wrap = $('fpsFoes');
   wrap.textContent = '';
@@ -3755,6 +3863,7 @@ function stepFps(dt){
   shake *= Math.pow(0.03, dt);
   fpsStepTracers(dt);
   fpsStepCamera();
+  if(fpsState === 'fight') fpsPlaceTags();
   fpsPlaceViewGun();
   fpsPaintHud();
   fpsPaintRoster();
@@ -3766,6 +3875,7 @@ function stepFps(dt){
 function fpsOpenPick(){
   fpsExitLock();
   fpsFiring = false;
+  fpsClearTags();
   $('fpsHud').hidden = true;
   fpsRollRoster(fpsTriple ? 6 : 3);
   fpsBuildPick();
@@ -3773,6 +3883,10 @@ function fpsOpenPick(){
 }
 function fpsBuildPick(){
   var need = fpsTriple ? 3 : 1;
+  $('fpsHowto').innerHTML = isCoarse
+    ? 'The <b>arrows</b> walk you, <b>drag the screen</b> to look around and the red <b>FIRE</b> button shoots. Walk over a gun on the sand to pick it up.'
+    : '<b>W A S D</b> to walk, <b>move the mouse</b> to look, <b>click</b> to shoot. Walk over a gun on the sand to pick it up &mdash; you start with your fists.'
+;
   $('fpsPickSub').textContent = fpsTriple
     ? 'Six of them are available. Choose three and take all three on at once. It pays half as much again.'
     : 'Three of them are available. Choose one. Their rating is out of 99 and it is not decoration.';
@@ -3787,7 +3901,8 @@ function fpsBuildPick(){
       b.className = 'foe-card' + (fpsChosen.indexOf(f) >= 0 ? ' on' : '');
       var sw = document.createElement('i');
       sw.className = 'foe-swatch';
-      sw.style.background = f.skin.t;
+      if(!f.avatar) f.avatar = fpsAvatarURL(f.skin);
+      sw.style.backgroundImage = 'url(' + f.avatar + ')';
       var col = document.createElement('span');
       col.className = 'foe-body';
       var nm = document.createElement('b');
@@ -3818,6 +3933,7 @@ function fpsBuildPick(){
 }
 function fpsClearFoes(){
   for(var i=0;i<fpsFoes.length;i++) if(fpsFoes[i].fp.wmesh) scene.remove(fpsFoes[i].fp.wmesh);
+  fpsClearTags();
   fpsFoes.length = 0;
   clearDummies();
 }
@@ -3859,6 +3975,7 @@ function fpsBegin(){
   fpsMe.alive = true; fpsMe.kills = 0; fpsMe.purse = 0; fpsMe.kick = 0; fpsMe.hurtT = 0;
   fpsPaintGun();
   fpsState = 'fight';
+  fpsGrabKeys();
   $('fpsHud').hidden = false;
   $('fpsTouch').hidden = !isCoarse;
   $('fpsHurt').style.opacity = '0';
@@ -4965,6 +5082,7 @@ $('modeArena').addEventListener('click', function(){ sfx.wake(); startArena(); }
 $('modeStory').addEventListener('click', function(){ sfx.wake(); startStory(); });
 $('modeFps').addEventListener('click', function(){ sfx.wake(); startFps(); });
 $('fpsGo').addEventListener('click', function(){ sfx.wake(); fpsBegin(); });
+window.addEventListener('focus', function(){ if(gameMode === 'fps' && fpsState === 'fight') fpsGrabKeys(); });
 $('fpsHome').addEventListener('click', function(){ sfx.wake(); closeSheets(); showHome(); });
 $('fpsTripleBtn').addEventListener('click', function(){
   sfx.wake();
@@ -4983,7 +5101,7 @@ for(var fb=0;fb<fpsPadBtns.length;fb++){
     btn.addEventListener('pointercancel', set(false));
   })(fpsPadBtns[fb]);
 }
-$('fpsFireBtn').addEventListener('pointerdown', function(e){ e.preventDefault(); sfx.wake(); fpsFiring = true; fpsFire(); });
+$('fpsFireBtn').addEventListener('pointerdown', function(e){ e.preventDefault(); sfx.wake(); fpsGrabKeys(); fpsFiring = true; fpsFire(); });
 function fpsStopFire(e){ if(e) e.preventDefault(); fpsFiring = false; }
 $('fpsFireBtn').addEventListener('pointerup', fpsStopFire);
 $('fpsFireBtn').addEventListener('pointerleave', fpsStopFire);
@@ -5128,6 +5246,7 @@ renderer.domElement.addEventListener('pointerdown', function(e){
     if(fpsState !== 'fight') return;
     /* dragging always looks, so the mode still plays if the pointer lock is
        refused; with a mouse the same press also pulls the trigger */
+    fpsGrabKeys();
     fpsLook = { id:e.pointerId, x:e.clientX, y:e.clientY };
     try { renderer.domElement.setPointerCapture(e.pointerId); } catch(err){}
     if(!isCoarse){
