@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v40</div>
+<div id="verTag">v41</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -541,7 +541,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v40</p>
+    <p class="home-ver" id="homeVer">v41</p>
   </div>
 </section>
 
@@ -4218,6 +4218,8 @@ var CAN_THEME = { name:'The Range', tip:'Aim low.',
 function canAddBlock(kind, x, y, hx, hy, hz, tint, tough){
   addPart(kind, x, y, 0, hx, hy, hz, 0, tint);
   var p = parts[parts.length - 1];
+  /* timber and stone: he thumps into it rather than pinging off */
+  p.rest = 0.08; p.fric = 0.45;
   var b = { part:p, x:x, y:y, hx:hx, hy:hy, hz:hz, down:false,
             tough:tough || 9, wait:0 };
   cannonBlocks.push(b);
@@ -4288,6 +4290,7 @@ function buildCannonScene(n){
   TOP = 30; arenaR = 60; arenaCeil = 60;
   /* the launch platform, and a back wall so nothing sails off into nothing */
   addPart('deck', CAN_LAUNCH.x, 2.6, 0, 3.2, 2.6, 3.2, 0, '#6E6A5E');
+  parts[parts.length-1].rest = 0.06;
   addPart('brick', CAN_TOWER_X + 19, 6, 0, 0.8, 6, 8, 0, '#6E6A5E');
   buildCannonTower(n);
   canAddNpcs(n);
@@ -4352,19 +4355,21 @@ function canFootprint(q, out){
   return out;
 }
 var _fa = { x:0, y:0, hw:0, hh:0 }, _fb = { x:0, y:0, hw:0, hh:0 };
-var BLOCK_BOUNCE = 0.16, BLOCK_FRIC = 0.62;
+/* Contacts here only ever push blocks apart and cancel the speed driving them
+   together. Nothing bounces and nothing is slowed down in here, because this
+   runs a different number of times each frame depending on how much is
+   touching what — put the damping in and heavy stone starts behaving like a
+   rubber ball. All of that is done once, below, against the clock. */
+var SOFTEN = 0.7;                       /* ease overlaps out instead of popping */
 function canHitFloor(q){
   canFootprint(q, _fa);
   var low = _fa.y - _fa.hh;
-  if(low >= 0) return false;
+  if(low >= -0.0005) return false;
   q.mesh.position.y -= low;
-  if(q.vy < 0) q.vy = -q.vy * BLOCK_BOUNCE;
-  q.vx *= BLOCK_FRIC;
-  q.az *= 0.45;
+  if(q.vy < 0) q.vy = 0;                /* stone does not bounce */
   q.rested = true;
   return true;
 }
-/* a block still standing in the tower does not move for anybody */
 function canVsStanding(q, b){
   canFootprint(q, _fa);
   var dx = b.x - _fa.x, dy = b.y - _fa.y;
@@ -4372,16 +4377,16 @@ function canVsStanding(q, b){
   var oy = (_fa.hh + b.hy) - Math.abs(dy); if(oy <= 0) return;
   if(oy < ox){
     var sy = dy < 0 ? 1 : -1;
-    q.mesh.position.y += sy * oy;
+    q.mesh.position.y += sy * oy * SOFTEN;
     if(sy > 0){
-      if(q.vy < 0) q.vy = -q.vy * BLOCK_BOUNCE;
-      q.vx *= BLOCK_FRIC;
-      /* only genuinely on top of it, not scraping past the side */
+      if(q.vy < 0) q.vy = 0;
+      /* genuinely on top of it, not scraping past the side */
       if(b.y + b.hy <= _fa.y + 0.15) q.rested = true;
     } else if(q.vy > 0) q.vy = 0;
   } else {
-    q.mesh.position.x += (dx < 0 ? 1 : -1) * ox;
-    q.vx *= -0.3;
+    var sx = dx < 0 ? 1 : -1;
+    q.mesh.position.x += sx * ox * SOFTEN;
+    if(q.vx * sx < 0) q.vx = 0;         /* stopped, not rebounded */
   }
 }
 function canVsBlock(A, B){
@@ -4391,20 +4396,18 @@ function canVsBlock(A, B){
   var oy = (_fa.hh + _fb.hh) - Math.abs(dy); if(oy <= 0) return;
   if(oy < ox){
     var sy = dy < 0 ? 1 : -1;            /* which way A has to go */
-    A.mesh.position.y += sy * oy * 0.5;
-    B.mesh.position.y -= sy * oy * 0.5;
-    var mid = (A.vy + B.vy) * 0.5;
+    A.mesh.position.y += sy * oy * 0.5 * SOFTEN;
+    B.mesh.position.y -= sy * oy * 0.5 * SOFTEN;
+    var mid = (A.vy + B.vy) * 0.5;       /* they travel together from here */
     A.vy = mid; B.vy = mid;
-    A.vx *= BLOCK_FRIC; B.vx *= BLOCK_FRIC;
-    /* whoever is on top is the one being held up */
     if(sy > 0){ if(_fb.y + _fb.hh <= _fa.y + 0.15) A.rested = true; }
     else if(_fa.y + _fa.hh <= _fb.y + 0.15) B.rested = true;
   } else {
     var sx = dx < 0 ? 1 : -1;
-    A.mesh.position.x += sx * ox * 0.5;
-    B.mesh.position.x -= sx * ox * 0.5;
+    A.mesh.position.x += sx * ox * 0.5 * SOFTEN;
+    B.mesh.position.x -= sx * ox * 0.5 * SOFTEN;
     var mx = (A.vx + B.vx) * 0.5;
-    A.vx = mx * 0.4; B.vx = mx * 0.4;
+    A.vx = mx; B.vx = mx;
   }
 }
 function canStepBlocks(dt){
@@ -4416,11 +4419,10 @@ function canStepBlocks(dt){
     if(canSupported(b)){ b.wait = 0; continue; }
     b.wait += dt;
     if(b.wait > 0.06){
-      /* it tips towards the end that lost its support, and otherwise just
-         drops straight down the way anything unsupported does */
-      /* it goes over towards the end that lost its footing */
-      var tip = b.tipLeft ? 1 : (b.tipRight ? -1 : (Math.random() < 0.5 ? -1 : 1) * 0.55);
-      canTopple(b, tip * 2.6, 0, tip * 2.2);
+      /* it goes over towards the end that lost its footing — turning about
+         what is left rather than leaping sideways */
+      var tip = b.tipLeft ? 1 : (b.tipRight ? -1 : (Math.random() < 0.5 ? -1 : 1) * 0.5);
+      canTopple(b, tip * 0.7, 0, tip * 2.6);
     }
   }
   /* gravity, always */
@@ -4430,24 +4432,21 @@ function canStepBlocks(dt){
     q.vy += G * dt;
     q.mesh.position.x += q.vx * dt;
     q.mesh.position.y += q.vy * dt;
-
     q.rz += q.az * dt;
-    q.wasRested = q.rested;
     q.rested = false;
-    /* a falling block takes out anything it lands across */
     if(q.age > 0.08){
       for(k=0;k<cannonBlocks.length;k++){
         var st = cannonBlocks[k];
         if(st.down) continue;
         if(Math.abs(q.mesh.position.x - st.x) < st.hx + q.b.hx * 0.7 &&
            Math.abs(q.mesh.position.y - st.y) < st.hy + q.b.hy * 0.7){
-          canTopple(st, q.vx * 0.45, Math.min(0, q.vy * 0.3), q.vx * 0.12);
+          canTopple(st, q.vx * 0.35, Math.min(0, q.vy * 0.25), q.vx * 0.10);
         }
       }
     }
   }
   /* and then sort out who is on top of whom */
-  var GRACE = 0.42;
+  var GRACE = 0.3;
   for(var pass=0; pass<3; pass++){
     for(i=0;i<cannonFalling.length;i++){
       q = cannonFalling[i];
@@ -4459,25 +4458,29 @@ function canStepBlocks(dt){
       }
     }
   }
-  /* with something underneath and nearly still, let it lie flat and stop */
+  /* the one place anything is damped, so it does not depend on how many
+     things happened to be touching this frame */
+  var air = Math.pow(0.55, dt), grip = Math.pow(0.004, dt);
   for(i=0;i<cannonFalling.length;i++){
     q = cannonFalling[i];
-    if(q.age < 0.55 || !q.rested){ q.still = 0; continue; }
-    var speed = Math.abs(q.vx) + Math.abs(q.vy) + Math.abs(q.az);
-    q.still = speed < 2.4 ? q.still + dt : 0;
-    if(q.still > 0.25){
-      q.az *= 0.5;
-      q.vx *= 0.65;
-      var snapZ = Math.round(q.rz / (Math.PI/2)) * (Math.PI/2);
-      q.rz += (snapZ - q.rz) * Math.min(1, dt * 7);
+    q.az *= air;
+    if(q.az > 4) q.az = 4; else if(q.az < -4) q.az = -4;
+    if(!q.rested || q.age < 0.45){ q.still = 0; continue; }
+    q.vx *= grip;
+    q.az *= grip;
+    if(Math.abs(q.vx) < 0.12) q.vx = 0;
+    if(Math.abs(q.az) < 0.2) q.az = 0;
+    if(Math.abs(q.vy) < 0.3) q.vy = 0;
+    var moving = Math.abs(q.vx) + Math.abs(q.vy) + Math.abs(q.az);
+    q.still = moving < 1.0 ? q.still + dt : 0;
+    if(q.still > 0.12){
+      /* lie flat: eased, never snapped, or it looks like it jumped */
+      var snap = Math.round(q.rz / (Math.PI/2)) * (Math.PI/2);
+      q.rz += (snap - q.rz) * Math.min(1, dt * 6);
       if(!q.thud){ q.thud = true; sfx.scuff(); }
     }
-    if(q.rested && Math.abs(q.vy) < 0.4) q.vy = 0;
   }
-  for(i=0;i<cannonFalling.length;i++){
-    q = cannonFalling[i];
-    q.mesh.rotation.set(0, 0, q.rz);
-  }
+  for(i=0;i<cannonFalling.length;i++) cannonFalling[i].mesh.rotation.set(0, 0, cannonFalling[i].rz);
 }
 /* ---------- aiming and launching ---------- */
 var canDotMat = new THREE.MeshBasicMaterial({ color:0xFFFFFF, fog:false, transparent:true, opacity:0.75 });
