@@ -493,7 +493,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v41</div>
+<div id="verTag">v42</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v41</p>
+    <p class="home-ver" id="homeVer">v42</p>
   </div>
 </section>
 
@@ -4180,7 +4180,7 @@ function fpsBegin(){
    everything above them down on its own. */
 var CAN_LAUNCH = { x:-20, y:6.5, z:0 };
 var CAN_TOWER_X = 9;
-var cannonBlocks = [], cannonFalling = [], cannonDebris = [];
+var cannonBlocks = [], cannonDebris = [];
 var cannonState = 'aim', cannonLevel = 1, cannonLeft = 0, cannonMax = 5;
 var cannonDown = 0, cannonTarget = 0, cannonTotal = 0;
 var cannonNoob = null, cannonAim = null, cannonSettle = 0, cannonMsgT = 0, cannonTopY = 20;
@@ -4191,16 +4191,18 @@ var CAN_THEME = { name:'The Range', tip:'Aim low.',
   room:['#7E8A96','#5E6A76'], grass:['#8FA65E','#7E9450'],
   mix:['deck','brick','beam','deck','brick','gold'] };
 
-function canAddBlock(kind, x, y, hx, hy, hz, tint, tough){
-  addPart(kind, x, y, 0, hx, hy, hz, 0, tint);
-  var p = parts[parts.length - 1];
-  /* timber and stone: he thumps into it rather than pinging off */
-  p.rest = 0.08; p.fric = 0.45;
-  var b = { part:p, x:x, y:y, hx:hx, hy:hy, hz:hz, down:false,
-            tough:tough || 9, wait:0 };
-  cannonBlocks.push(b);
-  return b;
-}
+/* ---------- the tower, as physics ----------
+
+   Every block is simulated, standing ones included, and a block's height only
+   ever comes from something underneath it: the ground, or the top of another
+   block that is below its middle. That is the whole design, and it is what
+   makes floating impossible. Earlier versions pushed blocks apart along
+   whichever axis was shortest, which after a deep overlap meant straight up —
+   one of them ended up nine metres in the air and was then marked as resting.
+
+   A wide slab is checked under each end. With both ends held it lies level;
+   with one it pivots about the end that is left, which is what brings a floor
+   down when you knock a leg out; with neither it drops. */
 function buildCannonTower(n){
   cannonBlocks.length = 0;
   var floors = Math.min(3 + Math.floor(n / 2), 8);
@@ -4272,191 +4274,133 @@ function buildCannonScene(n){
   canAddNpcs(n);
 }
 
-/* ---------- knocking it down ---------- */
-function canTopple(b, vx, vy, spin){
-  if(b.down) return;
-  b.down = true;
-  b.part.broken = true;                 /* the collision loop skips it from here */
-  cannonDown++;
-  cannonFalling.push({
-    b:b, mesh:b.part.mesh, age:0, still:0, rested:false, thud:false,
-    vx:vx || 0, vy:vy || 0, vz:0,
-    az:spin || 0,
-    rz:0
-  });
-  sfx.hit(14);
-  addPop('+$' + 12, b.x, b.y + b.hy, 0, false);
-  save.money += 12; persist();
+function canAddBlock(kind, x, y, hx, hy, hz, tint, tough){
+  addPart(kind, x, y, 0, hx, hy, hz, 0, tint);
+  var p = parts[parts.length - 1];
+  /* timber and stone: he thumps into it rather than pinging off */
+  p.rest = 0.08; p.fric = 0.45;
+  var b = { part:p, mesh:p.mesh, x0:x, y0:y,
+            x:x, y:y, rz:0, vx:0, vy:0, w:0,
+            hx:hx, hy:hy, hz:hz, down:false, rested:true, thud:false,
+            tough:tough || 9 };
+  cannonBlocks.push(b);
+  return b;
 }
-/* a block is standing only while something solid is under it */
-/* A slab needs something under each end. Knock one leg out from under a
-   floor and the floor comes down, which is the whole point of the mode; a
-   single surviving upright used to hold up the entire building. */
-function canUnder(x, y){
+/* half-width and half-height of the box that contains it once it has turned */
+function canHW(b){ return b.hx * Math.abs(Math.cos(b.rz)) + b.hy * Math.abs(Math.sin(b.rz)); }
+function canHH(b){ return b.hx * Math.abs(Math.sin(b.rz)) + b.hy * Math.abs(Math.cos(b.rz)); }
+/* the highest thing under this point that is low enough to hold b up */
+function canTopUnder(b, x, ceiling){
+  var top = 0;                                   /* the ground is always there */
   for(var i=0;i<cannonBlocks.length;i++){
     var o = cannonBlocks[i];
-    if(o.down) continue;
-    if(Math.abs((o.y + o.hy) - y) > 0.5) continue;
-    if(Math.abs(o.x - x) > o.hx + 0.25) continue;
-    return true;
+    if(o === b) continue;
+    var ow = canHW(o), ot = o.y + canHH(o);
+    if(ot > ceiling) continue;                   /* level with or above us: not support */
+    if(x < o.x - ow || x > o.x + ow) continue;
+    if(ot > top) top = ot;
   }
-  return false;
+  return top;
 }
-function canSupported(b){
-  var bottom = b.y - b.hy;
-  b.tipLeft = b.tipRight = false;
-  if(bottom < 0.35) return true;                      /* on the ground */
-  if(b.hx > 1.6){
-    var L = canUnder(b.x - b.hx * 0.62, bottom);
-    var R = canUnder(b.x + b.hx * 0.62, bottom);
-    b.tipLeft = !L && R;                              /* lost its left leg */
-    b.tipRight = !R && L;
-    return L && R;
+function canTopple(b, vx, vy, spin){
+  if(!b.down){
+    b.down = true;
+    b.part.broken = true;               /* the collision loop skips it from here */
+    cannonDown++;
+    sfx.hit(14);
+    addPop('+$' + 12, b.x, b.y + b.hy, 0, false);
+    save.money += 12; persist();
   }
-  return canUnder(b.x, bottom);
-}
-/* ---------- the rubble ---------- */
-/* Every block that has been knocked out stays under gravity for good. There is
-   no settled state that parks one in mid-air: a block is still only because
-   something is underneath holding it up, and the moment that goes it carries on
-   down. Contacts use the axis-aligned box that contains the block once it has
-   turned, which is all the shape needed to stop them passing through each other
-   and let the pile build up. */
-function canFootprint(q, out){
-  var c = Math.abs(Math.cos(q.rz)), sn = Math.abs(Math.sin(q.rz));
-  out.x = q.mesh.position.x;
-  out.y = q.mesh.position.y;
-  out.hw = q.b.hx * c + q.b.hy * sn;
-  out.hh = q.b.hx * sn + q.b.hy * c;
-  return out;
-}
-var _fa = { x:0, y:0, hw:0, hh:0 }, _fb = { x:0, y:0, hw:0, hh:0 };
-/* Contacts here only ever push blocks apart and cancel the speed driving them
-   together. Nothing bounces and nothing is slowed down in here, because this
-   runs a different number of times each frame depending on how much is
-   touching what — put the damping in and heavy stone starts behaving like a
-   rubber ball. All of that is done once, below, against the clock. */
-var SOFTEN = 0.7;                       /* ease overlaps out instead of popping */
-function canHitFloor(q){
-  canFootprint(q, _fa);
-  var low = _fa.y - _fa.hh;
-  if(low >= -0.0005) return false;
-  q.mesh.position.y -= low;
-  if(q.vy < 0) q.vy = 0;                /* stone does not bounce */
-  q.rested = true;
-  return true;
-}
-function canVsStanding(q, b){
-  canFootprint(q, _fa);
-  var dx = b.x - _fa.x, dy = b.y - _fa.y;
-  var ox = (_fa.hw + b.hx) - Math.abs(dx); if(ox <= 0) return;
-  var oy = (_fa.hh + b.hy) - Math.abs(dy); if(oy <= 0) return;
-  if(oy < ox){
-    var sy = dy < 0 ? 1 : -1;
-    q.mesh.position.y += sy * oy * SOFTEN;
-    if(sy > 0){
-      if(q.vy < 0) q.vy = 0;
-      /* genuinely on top of it, not scraping past the side */
-      if(b.y + b.hy <= _fa.y + 0.15) q.rested = true;
-    } else if(q.vy > 0) q.vy = 0;
-  } else {
-    var sx = dx < 0 ? 1 : -1;
-    q.mesh.position.x += sx * ox * SOFTEN;
-    if(q.vx * sx < 0) q.vx = 0;         /* stopped, not rebounded */
-  }
-}
-function canVsBlock(A, B){
-  canFootprint(A, _fa); canFootprint(B, _fb);
-  var dx = _fb.x - _fa.x, dy = _fb.y - _fa.y;
-  var ox = (_fa.hw + _fb.hw) - Math.abs(dx); if(ox <= 0) return;
-  var oy = (_fa.hh + _fb.hh) - Math.abs(dy); if(oy <= 0) return;
-  if(oy < ox){
-    var sy = dy < 0 ? 1 : -1;            /* which way A has to go */
-    A.mesh.position.y += sy * oy * 0.5 * SOFTEN;
-    B.mesh.position.y -= sy * oy * 0.5 * SOFTEN;
-    var mid = (A.vy + B.vy) * 0.5;       /* they travel together from here */
-    A.vy = mid; B.vy = mid;
-    if(sy > 0){ if(_fb.y + _fb.hh <= _fa.y + 0.15) A.rested = true; }
-    else if(_fa.y + _fa.hh <= _fb.y + 0.15) B.rested = true;
-  } else {
-    var sx = dx < 0 ? 1 : -1;
-    A.mesh.position.x += sx * ox * 0.5 * SOFTEN;
-    B.mesh.position.x -= sx * ox * 0.5 * SOFTEN;
-    var mx = (A.vx + B.vx) * 0.5;
-    A.vx = mx; B.vx = mx;
-  }
+  b.vx += vx || 0;
+  b.vy += vy || 0;
+  b.w += spin || 0;
 }
 function canStepBlocks(dt){
-  var i, k, q;
-  /* anything left hanging in the air comes down a beat later */
+  var i, k, b;
+  var air = Math.pow(0.6, dt), grip = Math.pow(0.02, dt);
   for(i=0;i<cannonBlocks.length;i++){
-    var b = cannonBlocks[i];
-    if(b.down) continue;
-    if(canSupported(b)){ b.wait = 0; continue; }
-    b.wait += dt;
-    if(b.wait > 0.06){
-      /* it goes over towards the end that lost its footing — turning about
-         what is left rather than leaping sideways */
-      var tip = b.tipLeft ? 1 : (b.tipRight ? -1 : (Math.random() < 0.5 ? -1 : 1) * 0.5);
-      canTopple(b, tip * 0.7, 0, tip * 2.6);
+    b = cannonBlocks[i];
+    var hw = canHW(b), hh = canHH(b);
+    var wide = b.hx > 1.6;
+    var ceiling = b.y + hh * 0.45;              /* support has to be below this */
+    var supL, supR, sup;
+    if(wide){
+      supL = canTopUnder(b, b.x - hw * 0.72, ceiling);
+      supR = canTopUnder(b, b.x + hw * 0.72, ceiling);
+      sup = Math.max(supL, supR);
+    } else {
+      supL = supR = sup = canTopUnder(b, b.x, ceiling);
     }
+    var bottom = b.y - hh;
+    var onIt = bottom <= sup + 0.06;
+    if(onIt){
+      b.y = sup + hh;
+      if(b.vy < 0) b.vy = 0;
+      b.rested = true;
+      if(wide){
+        /* held at one end only: it pivots about that end and comes down */
+        var gapL = sup - supL, gapR = sup - supR;
+        if(gapL > 0.6) b.w -= 3.2 * dt;
+        else if(gapR > 0.6) b.w += 3.2 * dt;
+        else { b.w *= grip; b.vx *= grip; }
+      } else {
+        b.w *= grip; b.vx *= grip;
+      }
+    } else {
+      b.rested = false;
+      b.vy += G * dt;                           /* nothing under it: it falls */
+    }
+    b.w *= air;
+    if(b.w > 5) b.w = 5; else if(b.w < -5) b.w = -5;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    b.rz += b.w * dt;
+    if(b.y - canHH(b) < 0){ b.y = canHH(b); if(b.vy < 0) b.vy = 0; b.rested = true; }
   }
-  /* gravity, always */
-  for(i=0;i<cannonFalling.length;i++){
-    q = cannonFalling[i];
-    q.age += dt;
-    q.vy += G * dt;
-    q.mesh.position.x += q.vx * dt;
-    q.mesh.position.y += q.vy * dt;
-    q.rz += q.az * dt;
-    q.rested = false;
-    if(q.age > 0.08){
-      for(k=0;k<cannonBlocks.length;k++){
-        var st = cannonBlocks[k];
-        if(st.down) continue;
-        if(Math.abs(q.mesh.position.x - st.x) < st.hx + q.b.hx * 0.7 &&
-           Math.abs(q.mesh.position.y - st.y) < st.hy + q.b.hy * 0.7){
-          canTopple(st, q.vx * 0.35, Math.min(0, q.vy * 0.25), q.vx * 0.10);
-        }
+  /* keep them out of each other sideways only — never vertically, because that
+     is exactly what used to fire one into the sky */
+  for(var pass=0; pass<2; pass++){
+    for(i=0;i<cannonBlocks.length;i++){
+      var A = cannonBlocks[i];
+      var aw = canHW(A), ah = canHH(A);
+      for(k=i+1;k<cannonBlocks.length;k++){
+        var C = cannonBlocks[k];
+        var cw = canHW(C), ch = canHH(C);
+        var dy = Math.abs(C.y - A.y);
+        if(dy > (ah + ch) * 0.7) continue;      /* stacked, not side by side */
+        var dx = C.x - A.x;
+        var ox = (aw + cw) - Math.abs(dx);
+        if(ox <= 0) continue;
+        var sx = dx < 0 ? 1 : -1;
+        var mA = A.down ? 0.5 : 0, mC = C.down ? 0.5 : 0;
+        if(!mA && !mC) continue;                /* two standing blocks: leave them */
+        var tot = mA + mC || 1;
+        A.x += sx * ox * (mA / tot) * 0.6;
+        C.x -= sx * ox * (mC / tot) * 0.6;
+        if(mA) A.vx = 0;
+        if(mC) C.vx = 0;
       }
     }
   }
-  /* and then sort out who is on top of whom */
-  var GRACE = 0.3;
-  for(var pass=0; pass<3; pass++){
-    for(i=0;i<cannonFalling.length;i++){
-      q = cannonFalling[i];
-      canHitFloor(q);
-      if(q.age < GRACE) continue;              /* still getting clear */
-      for(k=0;k<cannonBlocks.length;k++) if(!cannonBlocks[k].down) canVsStanding(q, cannonBlocks[k]);
-      for(k=i+1;k<cannonFalling.length;k++){
-        if(cannonFalling[k].age >= GRACE) canVsBlock(q, cannonFalling[k]);
+  /* anything that has shifted counts as knocked down, and stops being a wall */
+  for(i=0;i<cannonBlocks.length;i++){
+    b = cannonBlocks[i];
+    if(!b.down && (Math.abs(b.y - b.y0) > 0.3 || Math.abs(b.x - b.x0) > 0.3 || Math.abs(b.rz) > 0.18)){
+      canTopple(b, 0, 0, 0);
+    }
+    if(b.rested && b.down && !b.thud && Math.abs(b.vy) < 0.5){ b.thud = true; sfx.scuff(); }
+    /* a block at rest eases flat rather than balancing on a corner */
+    if(b.rested && Math.abs(b.w) < 0.35){
+      var snap = Math.round(b.rz / (Math.PI/2)) * (Math.PI/2);
+      b.rz += (snap - b.rz) * Math.min(1, dt * 4);
+      /* and a plank left standing on its end is not going to stay there */
+      if(b.down && canHH(b) > canHW(b) * 1.3){
+        b.w += (b.x > b.x0 ? 1.4 : -1.4) * dt;
       }
     }
+    b.mesh.position.set(b.x, b.y, 0);
+    b.mesh.rotation.set(0, 0, b.rz);
   }
-  /* the one place anything is damped, so it does not depend on how many
-     things happened to be touching this frame */
-  var air = Math.pow(0.55, dt), grip = Math.pow(0.004, dt);
-  for(i=0;i<cannonFalling.length;i++){
-    q = cannonFalling[i];
-    q.az *= air;
-    if(q.az > 4) q.az = 4; else if(q.az < -4) q.az = -4;
-    if(!q.rested || q.age < 0.45){ q.still = 0; continue; }
-    q.vx *= grip;
-    q.az *= grip;
-    if(Math.abs(q.vx) < 0.12) q.vx = 0;
-    if(Math.abs(q.az) < 0.2) q.az = 0;
-    if(Math.abs(q.vy) < 0.3) q.vy = 0;
-    var moving = Math.abs(q.vx) + Math.abs(q.vy) + Math.abs(q.az);
-    q.still = moving < 1.0 ? q.still + dt : 0;
-    if(q.still > 0.12){
-      /* lie flat: eased, never snapped, or it looks like it jumped */
-      var snap = Math.round(q.rz / (Math.PI/2)) * (Math.PI/2);
-      q.rz += (snap - q.rz) * Math.min(1, dt * 6);
-      if(!q.thud){ q.thud = true; sfx.scuff(); }
-    }
-  }
-  for(i=0;i<cannonFalling.length;i++) cannonFalling[i].mesh.rotation.set(0, 0, cannonFalling[i].rz);
 }
 /* ---------- aiming and launching ---------- */
 var canDotMat = new THREE.MeshBasicMaterial({ color:0xFFFFFF, fog:false, transparent:true, opacity:0.75 });
@@ -4585,7 +4529,6 @@ function canStartLevel(){
   canClearQueue();
   canClearNpcs();
   canHideDots();
-  cannonFalling.length = 0;
   cannonDown = 0;
   cannonLeft = cannonMax = Math.max(3, 6 - Math.floor((cannonLevel - 1) / 2));
   buildCannonScene(cannonLevel);
@@ -4666,9 +4609,9 @@ function stepCannon(dt){
       still = (v / FIXED) < 9;
     }
     var settling = false;
-    for(var b=0;b<cannonFalling.length;b++){
-      var q = cannonFalling[b];
-      if(Math.abs(q.vx) + Math.abs(q.vy) > 1.2 || q.age < 0.4){ settling = true; break; }
+    for(var b=0;b<cannonBlocks.length;b++){
+      var q = cannonBlocks[b];
+      if(Math.abs(q.vx) + Math.abs(q.vy) + Math.abs(q.w) > 1.2){ settling = true; break; }
     }
     if((still && !settling && cannonSettle > 1.1) || cannonSettle > 9) canCheckRound();
   }
