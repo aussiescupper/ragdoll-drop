@@ -17,10 +17,11 @@ runs full screen and offline.
   Swipe to take limbs off, or grab one and slam it into the floor.
 - **Colosseum** — pick a weapon and armour for two noobs and set them on each
   other. Sword, axe, spear or club; bare, leather or iron.
-- **Last Noob Standing** — first-person. Pick who you are fighting from a roster
-  of procedurally named noobs with a skill rating out of 99, or hit **Triple
-  mode** for six of them and take on three at once. Knives, pistols, SMGs,
-  shotguns and rifles lie about the colosseum sand; walk over one to take it.
+- **Last Noob Standing** — first-person. The candidates stand out on the sand
+  with their name, rank and rating out of 99 on a nametag over their heads;
+  click one to take him on, or hit **Triple mode** for six and pick three.
+  Knives, pistols, SMGs, shotguns and rifles lie about the colosseum, and
+  whatever a noob was carrying stays where he falls.
 - **A Noob's Day Out** — a choose‑your‑own‑adventure with eighteen endings. The
   room changes with the scene, he acts out whatever you pick, and there is a
   read‑aloud button.
