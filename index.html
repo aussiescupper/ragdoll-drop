@@ -517,7 +517,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v44</div>
+<div id="verTag">v45</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -541,7 +541,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v44</p>
+    <p class="home-ver" id="homeVer">v45</p>
   </div>
 </section>
 
@@ -1494,9 +1494,12 @@ var LIMBS = [[HEAD,NECK,0.62],[NECK,HIP,0.80],[SHL,HDL,0.40],[SHR,HDR,0.40],[HPL
 
 function spawnShard(x,y,z,vx,vy,vz,size,mat){
   if(shards.length > 190) return;
-  var m = new THREE.Mesh(boxGeo, mat || shardMat);
+  var blood = (mat === bloodMat);
+  var m = new THREE.Mesh(blood ? dropGeo : boxGeo, blood ? dropMat : (mat || shardMat));
   m.position.set(x,y,z);
-  m.scale.set(size*0.9, size*1.7, size*0.5);
+  /* a droplet is a droplet from any angle; splinters stay splintery */
+  if(blood) m.scale.setScalar(size * 0.5);
+  else m.scale.set(size*0.9, size*1.7, size*0.5);
   scene.add(m);
   shards.push({ mesh:m, vx:vx, vy:vy, vz:vz, life:1.2 + Math.random()*1.1, base:size,
                 rx:(Math.random()-0.5)*10, ry:(Math.random()-0.5)*10, rz:(Math.random()-0.5)*10 });
@@ -1595,7 +1598,12 @@ function clearShards(healScars){
 /* ============================ limbs coming off ============================ */
 var freeLimbs = [], stumps = [], detached = [false,false,false,false], cutAt = [0,0,0,0];
 var bloodMat = new THREE.MeshLambertMaterial({ color:0xA0170F, emissive:0x2C0604 });
-var stumpGeo = new THREE.BoxGeometry(0.64, 0.30, 0.70);
+/* flying blood is round and see-through; the stump capping a cut stays solid,
+   because a translucent one just lets you see inside him */
+var dropMat = new THREE.MeshLambertMaterial({ color:0xB81C12, emissive:0x3A0806,
+                                              transparent:true, opacity:0.7 });
+var dropGeo = new THREE.SphereGeometry(0.5, 8, 6);
+var stumpGeo = new THREE.SphereGeometry(0.42, 10, 7);
 var LIMB_PARTS = [
   { mesh:mArmL, a:SHL, b:HDL, w:0.72, d:0.80, pad:0.82, mat:matArm, bone:3, cutPad:0.41, cutShift:-0.205, freePad:0.41, freeShift:0.205 },
   { mesh:mArmR, a:SHR, b:HDR, w:0.72, d:0.80, pad:0.82, mat:matArm, bone:4, cutPad:0.41, cutShift:-0.205, freePad:0.41, freeShift:0.205 },
@@ -2607,13 +2615,35 @@ function separateDummies(){
           var d2 = dx*dx + dy*dy + dz*dz;
           if(d2 >= rr*rr || d2 < 1e-8) continue;
           var d = Math.sqrt(d2);
-          var f = (rr - d) / d * 0.5;
-          var ox = dx*f, oy = dy*f*0.3, oz = dz*f;
+          /* A little overlap is allowed. Without it two bodies resting against
+             each other are pushed apart, settle back together, and are pushed
+             again, which creeps them across the floor all by itself. */
+          var pen = rr - d;
+          if(pen <= 0.06) continue;
+          /* full separation, vertical included — cutting the vertical part to a
+             third is why one of them landing on another sank into him — but
+             capped, because the raw push adds up over eleven joints a side and
+             was throwing bodies into the air */
+          var f = (pen - 0.06) / d * 0.35;
+          var ox = dx*f, oy = dy*f, oz = dz*f;
+          var mag = Math.sqrt(ox*ox + oy*oy + oz*oz);
+          if(mag > 0.04){ var sc = 0.04 / mag; ox *= sc; oy *= sc; oz *= sc; }
           /* shift position and history together: they separate without being flung */
           pa.x -= ox; pa.y -= oy; pa.z -= oz;
           pa.px -= ox; pa.py -= oy; pa.pz -= oz;
           pb.x += ox; pb.y += oy; pb.z += oz;
           pb.px += ox; pb.py += oy; pb.pz += oz;
+          /* and take the speed they were closing at out of both of them, so one
+             comes to rest on the other rather than pressing on through */
+          var nx = dx/d, ny = dy/d, nz = dz/d;
+          var av = (pa.x-pa.px)*nx + (pa.y-pa.py)*ny + (pa.z-pa.pz)*nz;
+          var bv = (pb.x-pb.px)*nx + (pb.y-pb.py)*ny + (pb.z-pb.pz)*nz;
+          var rel = av - bv;
+          if(rel > 0){
+            var h = rel * 0.5;
+            pa.px += h*nx; pa.py += h*ny; pa.pz += h*nz;
+            pb.px -= h*nx; pb.py -= h*ny; pb.pz -= h*nz;
+          }
         }
       }
     }
