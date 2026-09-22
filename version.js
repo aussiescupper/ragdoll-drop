@@ -4,5 +4,5 @@
    running is always identifiable, and it always matches the published artifact.
    Bump with ../bump.sh ragdoll-drop, then `node build.js` — never edit the
    number in two places. */
-self.APP_VERSION = "37";
+self.APP_VERSION = "38";
 self.APP_DATE = "2026-09-22";

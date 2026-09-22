@@ -343,6 +343,19 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 #fpsCross::before,#fpsCross::after{content:"";position:absolute;background:rgba(255,255,255,.82);box-shadow:0 0 2px rgba(0,0,0,.8)}
 #fpsCross::before{left:10px;top:0;width:2px;height:22px}
 #fpsCross::after{top:10px;left:0;height:2px;width:22px}
+#fpsHitMark{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;
+  opacity:0;pointer-events:none}
+#fpsHitMark span{position:absolute;left:19px;top:1px;width:2px;height:10px;border-radius:1px;
+  background:#fff;box-shadow:0 0 3px rgba(0,0,0,.95);transform-origin:1px 19px}
+#fpsHitMark span:nth-child(1){transform:rotate(45deg)}
+#fpsHitMark span:nth-child(2){transform:rotate(135deg)}
+#fpsHitMark span:nth-child(3){transform:rotate(225deg)}
+#fpsHitMark span:nth-child(4){transform:rotate(315deg)}
+#fpsHitMark.head span{background:var(--coin);width:3px;height:13px}
+#fpsHitMark.kill span{background:var(--hot);width:3px;height:14px}
+#fpsHitMark.on{animation:hitpop .26s ease-out}
+@keyframes hitpop{from{opacity:1;transform:scale(.5)}to{opacity:0;transform:scale(1.3)}}
+@media (prefers-reduced-motion:reduce){#fpsHitMark.on{animation:none}}
 #fpsHurt{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .12s linear;
   background:radial-gradient(120% 100% at 50% 50%, rgba(160,20,12,0) 45%, rgba(160,20,12,.75) 100%)}
 #fpsFoes{position:absolute;left:50%;transform:translateX(-50%);top:calc(74px + env(safe-area-inset-top,0px));
@@ -459,7 +472,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v37</div>
+<div id="verTag">v38</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -480,7 +493,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v37</p>
+    <p class="home-ver" id="homeVer">v38</p>
   </div>
 </section>
 
@@ -526,6 +539,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <div id="fpsFoes"></div>
   <div id="fpsTags"></div>
   <div id="fpsCross"></div>
+  <div id="fpsHitMark"><span></span><span></span><span></span><span></span></div>
   <div class="fps-bar fps-left">
     <span class="fps-lab">Health</span>
     <span class="fps-meter"><i id="fpsHpFill"></i></span>
@@ -775,6 +789,12 @@ var sfx = (function(){
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.27);
       o.connect(f); f.connect(g); g.connect(master);
       o.start(t); o.stop(t + 0.31);
+    },
+    mark: function(kind){
+      /* short and bright, so it cuts through the thud of the shot */
+      if(kind === 2) { blip(1980, 2960, 0.07, 'square', 0.15); setTimeout(function(){ blip(2640, 1320, 0.09, 'triangle', 0.10); }, 60); }
+      else if(kind === 1) blip(1760, 2640, 0.055, 'square', 0.13);
+      else blip(1180, 1560, 0.045, 'square', 0.085);
     },
     crunch: function(){
       thud(0.17, 1700);
@@ -3442,7 +3462,7 @@ function fpsShoot(ox, oy, oz, dx, dy, dz, range, dmg, fromMe){
   if(hit){
     var hx = ox + dx*bestT, hy = oy + dy*bestT, hz = oz + dz*bestT;
     var head = (hitSeg.a === HEAD || hitSeg.b === HEAD);
-    fpsHurtFoe(hit, dmg * (head ? 2.6 : 1), hx, hy, hz, dx, dy, dz, head, fromMe);
+    fpsHurtFoe(hit, dmg * (head ? 2.6 : 1), hx, hy, hz, dx, dy, dz, head, fromMe, hitSeg);
   }
   return hit;
 }
@@ -3478,13 +3498,60 @@ function fpsMuzzle(){
 }
 
 /* ---------- damage ---------- */
-function fpsHurtFoe(d, dmg, px, py, pz, dx, dy, dz, head, fromMe){
+/* A hit lights up the piece of him you actually struck. The mesh's material
+   is swapped for a red one and put back a moment later, which costs nothing
+   and works for both arms and both legs without cloning anything. */
+var HIT_MAT = new THREE.MeshLambertMaterial({ color:0xFF3A22, emissive:0xC41608 });
+var fpsFlashes = [];
+function fpsMeshForSeg(d, S){
+  if(!S) return d.torso;
+  if(S.a === HEAD || S.b === HEAD) return d.head;
+  if(S.a === SHL && S.b === HDL) return d.limb[0];
+  if(S.a === SHR && S.b === HDR) return d.limb[1];
+  if(S.a === HPL && S.b === FTL) return d.limb[2];
+  if(S.a === HPR && S.b === FTR) return d.limb[3];
+  return d.torso;
+}
+function fpsFlashPart(mesh, secs){
+  if(!mesh) return;
+  for(var i=0;i<fpsFlashes.length;i++){
+    if(fpsFlashes[i].mesh === mesh){ fpsFlashes[i].t = secs; return; }   /* already lit */
+  }
+  fpsFlashes.push({ mesh:mesh, mat:mesh.material, t:secs });
+  mesh.material = HIT_MAT;
+}
+function fpsStepFlashes(dt){
+  for(var i=fpsFlashes.length-1;i>=0;i--){
+    fpsFlashes[i].t -= dt;
+    if(fpsFlashes[i].t > 0) continue;
+    fpsFlashes[i].mesh.material = fpsFlashes[i].mat;
+    fpsFlashes.splice(i, 1);
+  }
+}
+function fpsClearFlashes(){
+  for(var i=0;i<fpsFlashes.length;i++) fpsFlashes[i].mesh.material = fpsFlashes[i].mat;
+  fpsFlashes.length = 0;
+}
+function fpsHitMark(kind){
+  var el = $('fpsHitMark');
+  el.classList.remove('on', 'head', 'kill');
+  void el.offsetWidth;                 /* restart the animation */
+  if(kind === 2) el.classList.add('kill');
+  else if(kind === 1) el.classList.add('head');
+  el.classList.add('on');
+}
+function fpsHurtFoe(d, dmg, px, py, pz, dx, dy, dz, head, fromMe, seg){
   var F = d.fp;
   if(!F.alive) return;
   F.hp -= dmg;
   bleedBurst(px, py, pz, head ? 14 : 8);
   sfx.hit(14);
+  /* light up the piece you struck */
+  fpsFlashPart(fpsMeshForSeg(d, seg), head ? 0.30 : 0.22);
   if(fromMe){
+    var fatal = F.hp <= 0 || d.headOff || d.torsoCut > 0;
+    fpsHitMark(fatal ? 2 : (head ? 1 : 0));
+    sfx.mark(fatal ? 2 : (head ? 1 : 0));
     var cash = Math.round(dmg);
     save.money += cash; fpsMe.purse += cash; persist();
     addPop((head ? 'HEAD +$' : '+$') + cash, px, py, pz, head);
@@ -3865,6 +3932,7 @@ function stepFps(dt){
     fpsPlaceTags(fpsLine);
     return;
   }
+  fpsStepFlashes(dt);
   fpsMe.kick = Math.max(0, fpsMe.kick - dt * 7);
   fpsMe.hurtT = Math.max(0, fpsMe.hurtT - dt);
   shake *= Math.pow(0.03, dt);
@@ -4011,6 +4079,7 @@ function fpsBuildPick(){
     : 'Pick ' + left + (need === 1 ? '' : ' more');
 }
 function fpsClearFoes(){
+  fpsClearFlashes();
   for(var i=0;i<fpsFoes.length;i++) if(fpsFoes[i].fp.wmesh) scene.remove(fpsFoes[i].fp.wmesh);
   fpsClearTags();
   fpsFoes.length = 0;
