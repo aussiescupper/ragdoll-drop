@@ -22,6 +22,12 @@ runs full screen and offline.
   click one to take him on, or hit **Triple mode** for six and pick three.
   Knives, pistols, SMGs, shotguns and rifles lie about the colosseum, and
   whatever a noob was carrying stays where he falls.
+- **Noob Cannon** — a tower of blocks and a limited supply of noobs to fling at
+  it. Drag back from the platform like a catapult. Knock down enough of the
+  tower and the next one is taller; run out of noobs first and you go back to
+  level one. Take the legs out from under it: anything left with nothing
+  underneath comes down on its own, and a falling block takes out whatever it
+  lands across.
 - **A Noob's Day Out** — a choose‑your‑own‑adventure with eighteen endings. The
   room changes with the scene, he acts out whatever you pick, and there is a
   read‑aloud button.

@@ -319,6 +319,25 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 #fpsCross::before,#fpsCross::after{content:"";position:absolute;background:rgba(255,255,255,.82);box-shadow:0 0 2px rgba(0,0,0,.8)}
 #fpsCross::before{left:10px;top:0;width:2px;height:22px}
 #fpsCross::after{top:10px;left:0;height:2px;width:22px}
+#canHud{position:fixed;inset:0;z-index:3;pointer-events:none}
+.can-bar{position:absolute;left:50%;transform:translateX(-50%);
+  top:calc(74px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;
+  background:rgba(21,26,38,.82);border:2px solid rgba(255,255,255,.08);border-radius:11px;padding:8px 14px}
+.can-lab{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.can-meter{display:block;width:min(170px,30vw);height:9px;border-radius:999px;background:#0A0E14;overflow:hidden}
+.can-meter i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--coin),var(--mint));transition:width .18s linear}
+#canDown{font-family:var(--display);font-size:16px;color:var(--cream);font-variant-numeric:tabular-nums}
+.can-ammo{position:absolute;left:calc(14px + env(safe-area-inset-left,0px));
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:baseline;gap:8px;
+  background:rgba(21,26,38,.82);border:2px solid rgba(255,255,255,.08);border-radius:11px;padding:8px 14px}
+.can-ammo b{font-family:var(--display);font-size:24px;color:var(--coin);font-variant-numeric:tabular-nums}
+.can-ammo span{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+#canHelp{position:absolute;left:50%;transform:translateX(-50%);margin:0;
+  bottom:calc(18px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:800;color:#0E2438;
+  background:rgba(255,255,255,.76);padding:7px 14px;border-radius:999px;max-width:min(520px,80vw);text-align:center}
+#canMsg{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-family:var(--display);
+  font-size:clamp(20px,5.4vw,34px);color:var(--coin);text-shadow:0 4px 0 rgba(6,10,18,.6);text-align:center;
+  white-space:pre-line;line-height:1.22}
 #fpsHitMark{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;
   opacity:0;pointer-events:none}
 #fpsHitMark span{position:absolute;left:19px;top:1px;width:2px;height:10px;border-radius:1px;
@@ -448,7 +467,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v38</div>
+<div id="verTag">v39</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -462,6 +481,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
     <button class="btn big home-mode" id="modeTower" type="button">Tower Drop<small>Leap off the crate and smash your way down to the floor</small></button>
     <button class="btn big home-mode" id="modeSlice" type="button">Slice Lab<small>A room full of noobs, a sword and a grabbing hand</small></button>
     <button class="btn big home-mode" id="modeArena" type="button">Colosseum<small>Kit out two noobs and set them on each other</small></button>
+    <button class="btn big home-mode" id="modeCannon" type="button">Noob Cannon<small>Fling noobs at a tower until enough of it is on the floor</small></button>
     <button class="btn big home-mode" id="modeFps" type="button">Last Noob Standing<small>Pick your fight, then go in on foot with whatever is on the sand</small></button>
     <button class="btn big home-mode" id="modeStory" type="button">A Noob's Day Out<small>Make his decisions for him. He will regret all of them</small></button>
     <div class="row">
@@ -469,7 +489,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v38</p>
+    <p class="home-ver" id="homeVer">v39</p>
   </div>
 </section>
 
@@ -509,6 +529,18 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
     <button class="btn" id="btnArenaHome" type="button">Home</button>
   </div>
 </section>
+
+<div id="canHud" hidden>
+  <div class="can-bar">
+    <span class="can-lab" id="canLevel">Level 1</span>
+    <span class="can-meter"><i id="canFill"></i></span>
+    <b id="canDown">0 / 0</b>
+    <span class="can-lab">down</span>
+  </div>
+  <div class="can-ammo"><b id="canLeft">5</b><span>noobs left</span></div>
+  <div id="canMsg" hidden></div>
+  <p id="canHelp">Drag back from the platform and let go to fling him.</p>
+</div>
 
 <div id="fpsHud" hidden>
   <div id="fpsHurt"></div>
@@ -646,6 +678,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <h2 id="helpTitle">How to get rich</h2>
   <p class="sub">Leap off the crate and go limp. Every part your ragdoll smacks pays out &mdash; and every smack x-rays your bones for one second. Hit parts back to back to build a chain multiplier.</p>
   <p class="sub"><b>A Noob's Day Out</b> is a story you steer. He wakes up in the crate with no memory and no plan, and you pick what he does next. The room changes with the scene and he acts out whatever you choose. Eighteen endings, a <b>Read aloud</b> button if you would rather be told it, and <b>Hide</b> if you just want to watch.</p>
+  <p class="sub"><b>Noob Cannon</b> is the one with the tower. Drag back from the launch platform and let go, like a catapult &mdash; a dotted line shows where he will go. Knock down the number of blocks named at the top and the next tower is taller; run out of noobs before you get there and you go back to level one. Take the legs out from under it rather than picking at the top: anything left with nothing underneath comes down on its own, and a falling block takes out whatever it lands across.</p>
   <p class="sub"><b>Last Noob Standing</b> is the first-person one. Pick who you are fighting from a roster of noobs with made-up names and a skill rating out of 99 &mdash; the rating is real, and it drives how fast they move, how straight they shoot and how much they can take. The <b>Triple mode</b> button at the bottom deals out six of them instead of three and lets you take on three at once for half as much again. In the pit: <kbd>W A S D</kbd> to walk, move the mouse to look, click to shoot. On a tablet the arrows walk you, dragging the screen looks around and the red button fires. Knives, pistols, SMGs, shotguns and rifles lie about on the sand &mdash; walk over one to pick it up, and they come back a few seconds after somebody takes them. You start with your fists. Headshots pay double and often take the head clean off.</p>
   <p class="sub"><b>Colosseum</b> pits two noobs against each other. Pick a weapon and armour for each &mdash; sword, axe, spear or club, bare, leather or iron &mdash; then set them loose. They walk each other down and swing until one of them stops getting up. The winner pays out.</p>
   <p class="sub"><b>Slice Lab</b> is the other mode on the home screen: a room of loose noobs, no falling required. Pick <b>Sword</b> and the cursor becomes a blade &mdash; click or drag across a noob and it takes the arm or leg clean off for cash, with a bonus when all four are gone. Pick <b>Grab</b> to drag one around by whatever you clicked, then slam it into the floor or a wall &mdash; hard landings hurt and pay out, and a really heavy one rips a limb off. They haul themselves back up between hits &mdash; hips under them first, then the trunk, then the head &mdash; so there is always something standing to swing at. Once two limbs are off they stop smiling about it. Go for the <b>head</b> or cut them clean through the <b>torso</b> for the big money &mdash; either one finishes them. The camera sits still and the room is a plain box, so you can swing from anywhere on the screen and sweep straight through them. <b>New noob</b> drops another one in.</p>
@@ -677,7 +710,7 @@ if(!window.THREE){ $('hint').textContent = 'The 3D library did not load. Reload 
 
 /* ============================ save data ============================ */
 var SKEY = 'ragdolldrop.v1';
-var save = { money:0, best:0, drops:0, level:1, bestLevel:1, muted:false, colors:null, unlocked:[], opts:null, draw:null };
+var save = { money:0, best:0, drops:0, level:1, bestLevel:1, muted:false, colors:null, unlocked:[], opts:null, draw:null, canBest:1 };
 var opts = { glass:true, stick:true, scars:true, limbs:true, blood:true };
 try { var raw = localStorage.getItem(SKEY); if(raw) { var o = JSON.parse(raw); for(var k in o) if(k in save) save[k] = o[k]; } } catch(e){}
 function persist(){ save.opts = opts; try { localStorage.setItem(SKEY, JSON.stringify(save)); } catch(e){} }
@@ -1843,7 +1876,7 @@ function collideOne(j, scoring, hitOut){
       j.px = j.x - gvx * (1 - GROUND.fric);
       j.pz = j.z - gvz * (1 - GROUND.fric);
       if(gs > IMPACT_MIN && scoring) impact(GROUND, gs, j.x, j.y, j.z);
-      if(hitOut && gs > hitOut.speed){ hitOut.speed = gs; hitOut.x = j.x; hitOut.y = j.y; hitOut.z = j.z; }
+      if(hitOut && gs > hitOut.speed){ hitOut.speed = gs; hitOut.x = j.x; hitOut.y = j.y; hitOut.z = j.z; hitOut.part = null; }
     }
     for(var p=0;p<parts.length;p++){
       var q = parts[p];
@@ -1873,7 +1906,7 @@ function collideOne(j, scoring, hitOut){
         lv[(ax+1)%3] *= keep; lv[(ax+2)%3] *= keep;
         var speed = Math.abs(vn) / FIXED;
         if(speed > IMPACT_MIN && scoring) impact(q, speed, j.x, j.y, j.z);
-        if(hitOut && speed > hitOut.speed){ hitOut.speed = speed; hitOut.x = j.x; hitOut.y = j.y; hitOut.z = j.z; }
+        if(hitOut && speed > hitOut.speed){ hitOut.speed = speed; hitOut.x = j.x; hitOut.y = j.y; hitOut.z = j.z; hitOut.part = q; }
       }
       j.x = q.cx + lp[0]*q.bx0 + lp[1]*q.by0 + lp[2]*q.bz0;
       j.y = q.cy + lp[0]*q.bx1 + lp[1]*q.by1 + lp[2]*q.bz1;
@@ -2384,6 +2417,7 @@ function updateDummy(d){
 var RISE_STAGE = [2, 1, 0, 1, 1, 2, 2, 0, 0, 0, 0];
 var RISE_DELAY = [0, 0.32, 0.58];
 function standUp(d){
+  if(d.noStand) return;
   if(d.dead || d.headOff || d.torsoCut > 0 || d.sitting) return;
   if(grab && grab.d === d) return;
   var legL = d.gone[2] || d.broken[2], legR = d.gone[3] || d.broken[3];
@@ -2457,8 +2491,9 @@ function nearestDummyLimb(d, x, y, z){
 function dummyTakeHit(d){
   var H = d.hit;
   if(!H || H.speed < 11 || d.dead) return;
-  /* in the pit you are paid for shooting them, not for them tripping over */
-  if(d.fp){
+  /* in the pit you are paid for shooting them, not for them tripping over,
+     and at the range you are paid for the blocks */
+  if(d.fp || d.noStand || d.noPay){
     d.lastHurt = time;
     bleedBurst(H.x, H.y, H.z, 4);
     sfx.hit(H.speed);
@@ -4062,6 +4097,7 @@ function fpsClearFoes(){
   clearDummies();
 }
 function startFps(){
+  $('canHud').hidden = true;
   $('homeScreen').hidden = true;
   $('bottom').hidden = true;
   $('touch').hidden = true;
@@ -4109,6 +4145,391 @@ function fpsBegin(){
   fpsFlash(fpsChosen.length > 1 ? 'Three of them. Go.' : fpsChosen[0].name + ' — ' + fpsChosen[0].rank, 2.2);
   fpsPaintRoster();
   fpsPaintHud();
+}
+
+
+/* ============================ noob cannon ============================ */
+/* A tower of blocks and a limited supply of noobs to throw at it. Knock down
+   enough of it and the next tower is taller. Run out first and you start over.
+
+   The blocks are ordinary static colliders, which is what makes this cheap:
+   a block that comes down is flagged `broken`, which the collision loop already
+   skips, and its mesh is then tumbled by hand. Nothing needs real rigid-body
+   stacking — support is re-checked each frame, so knocking the legs out brings
+   everything above them down on its own. */
+var CAN_LAUNCH = { x:-20, y:6.5, z:0 };
+var CAN_TOWER_X = 9;
+var cannonBlocks = [], cannonFalling = [], cannonDebris = [];
+var cannonState = 'aim', cannonLevel = 1, cannonLeft = 0, cannonMax = 5;
+var cannonDown = 0, cannonTarget = 0, cannonTotal = 0;
+var cannonNoob = null, cannonAim = null, cannonSettle = 0, cannonMsgT = 0, cannonTopY = 20;
+var cannonDots = [];
+
+var CAN_THEME = { name:'The Range', tip:'Aim low.',
+  sky:['#4E8FD0','#95C4E8','#E8DCBC'], fog:0x9FB6C8,
+  room:['#7E8A96','#5E6A76'], grass:['#8FA65E','#7E9450'],
+  mix:['deck','brick','beam','deck','brick','gold'] };
+
+function canAddBlock(kind, x, y, hx, hy, hz, tint, tough){
+  addPart(kind, x, y, 0, hx, hy, hz, 0, tint);
+  var p = parts[parts.length - 1];
+  var b = { part:p, x:x, y:y, hx:hx, hy:hy, hz:hz, down:false,
+            tough:tough || 9, wait:0 };
+  cannonBlocks.push(b);
+  return b;
+}
+function buildCannonTower(n){
+  cannonBlocks.length = 0;
+  var floors = Math.min(3 + Math.floor((n - 1) / 2), 7);
+  var wide = n >= 4 ? 4.2 : 3.4;
+  var y = 0;
+  for(var f=0; f<floors; f++){
+    var lean = (f % 2) ? 0.35 : 0;
+    /* two uprights and a slab across them: the classic thing to knock over */
+    canAddBlock('crate', CAN_TOWER_X - wide + lean, y + 1.9, 0.55, 1.9, 1.3, '#9A6E3F', 8);
+    canAddBlock('crate', CAN_TOWER_X + wide - lean, y + 1.9, 0.55, 1.9, 1.3, '#9A6E3F', 8);
+    if(f % 2 === 1 && n >= 3){
+      canAddBlock('crate', CAN_TOWER_X, y + 1.9, 0.55, 1.9, 1.3, '#8A6136', 8);
+    }
+    canAddBlock('beam', CAN_TOWER_X, y + 4.1, wide + 1.0, 0.32, 1.45, '#6B7480', 11);
+    y += 4.42;
+  }
+  /* a chimney of small blocks on the roof, worth knocking off */
+  for(var c=0;c<2+Math.min(3, n);c++){
+    canAddBlock('brick', CAN_TOWER_X + (c % 2 ? 0.35 : -0.35), y + 0.9 + c*1.7, 0.9, 0.85, 0.9, '#8E4136', 6);
+  }
+  cannonTopY = y + 0.9 + (1 + Math.min(3, n)) * 1.7 + 0.85;
+  cannonTotal = cannonBlocks.length;
+  cannonTarget = Math.max(3, Math.round(cannonTotal * Math.min(0.78, 0.5 + n * 0.035)));
+}
+function buildCannonScene(n){
+  clearLevel();
+  theme = CAN_THEME;
+  applyTheme(theme);
+  setSky(['#2F72B8', '#79B0DE', '#DCE9F4']);
+  setGround(['#8FA65E', '#7E9450']);
+  hemi.color.set('#CFE2F2'); hemi.groundColor.set('#5E7038');
+  scene.fog.color.setHex(0xAFC4D4);
+  TOP = 30; arenaR = 60; arenaCeil = 60;
+  /* the launch platform, and a back wall so nothing sails off into nothing */
+  addPart('deck', CAN_LAUNCH.x, 2.6, 0, 3.2, 2.6, 3.2, 0, '#6E6A5E');
+  addPart('brick', CAN_TOWER_X + 19, 6, 0, 0.8, 6, 8, 0, '#6E6A5E');
+  buildCannonTower(n);
+}
+
+/* ---------- knocking it down ---------- */
+function canTopple(b, vx, vy, vz, spin){
+  if(b.down) return;
+  b.down = true;
+  b.part.broken = true;                 /* the collision loop skips it from here */
+  cannonDown++;
+  cannonFalling.push({
+    b:b, mesh:b.part.mesh,
+    vx:vx || (Math.random()-0.5)*3, vy:vy || 1.5, vz:vz || (Math.random()-0.5)*1.2,
+    ax:(Math.random()-0.5)*(spin || 5), az:(Math.random()-0.5)*(spin || 5),
+    rx:0, rz:0, rest:Math.min(b.hx, b.hy, b.hz), landed:false
+  });
+  sfx.hit(14);
+  addPop('+$' + 12, b.x, b.y + b.hy, 0, false);
+  save.money += 12; persist();
+}
+/* a block is standing only while something solid is under it */
+function canSupported(b){
+  if(b.y - b.hy < 0.35) return true;                 /* on the ground */
+  for(var i=0;i<cannonBlocks.length;i++){
+    var o = cannonBlocks[i];
+    if(o === b || o.down) continue;
+    if(Math.abs((o.y + o.hy) - (b.y - b.hy)) > 0.45) continue;
+    if(Math.abs(o.x - b.x) > o.hx + b.hx - 0.15) continue;
+    return true;
+  }
+  return false;
+}
+function canStepBlocks(dt){
+  var i, f;
+  /* anything left hanging in the air comes down a beat later */
+  for(i=0;i<cannonBlocks.length;i++){
+    var b = cannonBlocks[i];
+    if(b.down) continue;
+    if(canSupported(b)){ b.wait = 0; continue; }
+    b.wait += dt;
+    if(b.wait > 0.12) canTopple(b, (Math.random()-0.5)*2, 0, 0, 4);
+  }
+  /* tumble whatever is on its way down */
+  for(f=cannonFalling.length-1; f>=0; f--){
+    var q = cannonFalling[f];
+    if(q.landed) continue;
+    q.vy += G * dt;
+    var m = q.mesh;
+    m.position.x += q.vx * dt;
+    m.position.y += q.vy * dt;
+    m.position.z += q.vz * dt;
+    q.rx += q.ax * dt; q.rz += q.az * dt;
+    m.rotation.set(q.rx, 0, q.rz);
+    /* a falling block takes out anything it lands across */
+    for(i=0;i<cannonBlocks.length;i++){
+      var s = cannonBlocks[i];
+      if(s.down) continue;
+      if(Math.abs(m.position.x - s.x) < s.hx + q.b.hx * 0.7 &&
+         Math.abs(m.position.y - s.y) < s.hy + q.b.hy * 0.7){
+        canTopple(s, q.vx * 0.6, 0.8, 0, 5);
+      }
+    }
+    if(m.position.y <= q.rest){
+      m.position.y = q.rest;
+      q.vy = -q.vy * 0.22;
+      q.vx *= 0.55; q.vz *= 0.55;
+      q.ax *= 0.4; q.az *= 0.4;
+      if(Math.abs(q.vy) < 1.4){
+        q.landed = true;
+        /* settle flat rather than standing on a corner */
+        q.rx = Math.round(q.rx / (Math.PI/2)) * (Math.PI/2);
+        q.rz = Math.round(q.rz / (Math.PI/2)) * (Math.PI/2);
+        m.rotation.set(q.rx, 0, q.rz);
+        sfx.scuff();
+      }
+    }
+  }
+}
+
+/* ---------- aiming and launching ---------- */
+var canDotMat = new THREE.MeshBasicMaterial({ color:0xFFFFFF, fog:false, transparent:true, opacity:0.75 });
+function canMakeDots(){
+  for(var i=0;i<20;i++){
+    var m = new THREE.Mesh(boxGeo, canDotMat);
+    m.scale.setScalar(0.34 - i * 0.009);
+    m.visible = false;
+    scene.add(m);
+    cannonDots.push(m);
+  }
+}
+function canHideDots(){ for(var i=0;i<cannonDots.length;i++) cannonDots[i].visible = false; }
+function canShowDots(vx, vy){
+  for(var i=0;i<cannonDots.length;i++){
+    var t = (i + 1) * 0.075;
+    var x = CAN_LAUNCH.x + vx * t;
+    var y = CAN_LAUNCH.y + vy * t + 0.5 * G * t * t;
+    if(y < 0.2){ cannonDots[i].visible = false; continue; }
+    cannonDots[i].position.set(x, y, 0);
+    cannonDots[i].visible = true;
+  }
+}
+var cannonQueue = [];
+function canClearQueue(){
+  for(var i=cannonQueue.length-1;i>=0;i--) removeDummy(cannonQueue[i]);
+  cannonQueue.length = 0;
+}
+/* one stood on the platform ready to go and the rest queued behind him, so
+   how many you have left is something you can see rather than read */
+function canBuildQueue(){
+  canClearQueue();
+  for(var i=0;i<cannonLeft;i++){
+    var k = i - 1;
+    var x = i === 0 ? CAN_LAUNCH.x : CAN_LAUNCH.x - 4.4 - (k % 3) * 2.7;
+    var z = i === 0 ? 0 : 1.6 + Math.floor(k / 3) * 3.0;
+    var d = spawnDummy({ x:x, z:z, yaw:Math.PI/2 });
+    var gy = groundHeightAt(x, z, 12);
+    if(gy > 0.05){ for(var q=0;q<NJ;q++){ d.P[q].y += gy; d.P[q].py += gy; } }
+    d.noPay = true;
+    cannonQueue.push(d);
+  }
+  /* the posture spring rises in stages, so they need a decent run at it
+     before the first frame or they are caught still folded up */
+  for(var w=0; w<240; w++){
+    for(var m=0;m<cannonQueue.length;m++) stepDummy(cannonQueue[m]);
+    if(w % 2 === 0) separateDummies();
+  }
+  for(var u=0;u<cannonQueue.length;u++) updateDummy(cannonQueue[u]);
+}
+function canClearNoobs(){
+  for(var i=cannonDebris.length-1;i>=0;i--) removeDummy(cannonDebris[i]);
+  cannonDebris.length = 0;
+  cannonNoob = null;
+}
+function canLaunch(vx, vy){
+  if(cannonState !== 'aim' || cannonLeft <= 0) return;
+  canHideDots();
+  cannonLeft--;
+  var d = spawnDummy({ x:CAN_LAUNCH.x, z:0, yaw:Math.PI/2 });
+  for(var i=0;i<NJ;i++){
+    var q = d.P[i];
+    q.y += CAN_LAUNCH.y;  q.py = q.y;
+    q.px = q.x - vx * FIXED;
+    q.py = q.y - vy * FIXED;
+    q.pz = q.z - (Math.random()-0.5) * 0.6 * FIXED;
+  }
+  d.rising = false; d.noStand = true;
+  cannonNoob = d;
+  cannonDebris.push(d);
+  while(cannonDebris.length > 3) removeDummy(cannonDebris.shift());
+  cannonState = 'fly';
+  cannonSettle = 0;
+  sfx.launch(0.8);
+  canBuildQueue();
+  canPaintHud();
+}
+function canAimFrom(sx, sy, ex, ey){
+  /* pulled back from where you pressed, like a catapult */
+  var dx = (sx - ex) / 26, dy = (ey - sy) / 26;
+  var L = Math.sqrt(dx*dx + dy*dy);
+  var MAXV = 46;
+  if(L > 0.001 && L * 2.6 > MAXV){ dx = dx / L * (MAXV/2.6); dy = dy / L * (MAXV/2.6); }
+  return { vx:dx * 2.6, vy:dy * 2.6 };
+}
+
+/* ---------- the round ---------- */
+function canMsg(txt, secs){
+  var el = $('canMsg');
+  el.textContent = txt; el.hidden = false;
+  cannonMsgT = secs;
+}
+function canPaintHud(){
+  $('canLevel').textContent = 'Level ' + cannonLevel;
+  $('canDown').textContent = cannonDown + ' / ' + cannonTarget;
+  $('canLeft').textContent = cannonLeft;
+  var pct = cannonTarget ? Math.min(100, cannonDown / cannonTarget * 100) : 0;
+  $('canFill').style.width = pct + '%';
+}
+function canCamera(){
+  /* fit the box that holds the launcher and the tower, however tall it is */
+  var x0 = CAN_LAUNCH.x - 12, x1 = CAN_TOWER_X + 10;   /* the whole queue fits */
+  var y0 = -2, y1 = cannonTopY + 5;
+  var cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  var wide = (x1 - x0) / 2, high = (y1 - y0) / 2;
+  var halfH = camera.fov * Math.PI / 360;
+  var halfW = Math.atan(Math.tan(halfH) * Math.max(0.42, camera.aspect || 1.3));
+  var camZ = Math.max(wide / Math.tan(halfW * 0.93), high / Math.tan(halfH * 0.93), 26);
+  /* a tall window has to stand well back to fit the width, which leaves a field
+     of empty grass; lift the aim so the ground sits low in the frame instead */
+  var vHalf = camZ * Math.tan(halfH);
+  if(vHalf * 0.5 > cy) cy = vHalf * 0.5;
+  camera.position.set(cx, cy, camZ);
+  camera.lookAt(cx + (Math.random()-0.5)*shake, cy + (Math.random()-0.5)*shake, 0);
+  sun.position.set(cx - 14, cy + 40, camZ * 0.5 + 20);
+  sun.target.position.set(cx, cy * 0.5, 0);
+  sun.target.updateMatrixWorld();
+}
+function canNextLevel(){
+  cannonLevel++;
+  if(cannonLevel > (save.canBest || 1)){ save.canBest = cannonLevel; persist(); }
+  canStartLevel();
+}
+function canStartLevel(){
+  canClearNoobs();
+  canClearQueue();
+  canHideDots();
+  cannonFalling.length = 0;
+  cannonDown = 0;
+  cannonLeft = cannonMax = Math.max(3, 6 - Math.floor((cannonLevel - 1) / 3));
+  buildCannonScene(cannonLevel);
+  cannonState = 'aim';
+  canBuildQueue();
+  canPaintHud();
+  canMsg('Level ' + cannonLevel + '\nknock down ' + cannonTarget + ' of ' + cannonTotal, 2.4);
+}
+function canCheckRound(){
+  if(cannonState !== 'fly') return;
+  if(cannonDown >= cannonTarget){
+    cannonState = 'won';
+    var prize = 90 + cannonLevel * 45 + cannonLeft * 30;
+    save.money += prize; persist();
+    sfx.cash();
+    canMsg('TOWER DOWN\n+$' + prize, 2.6);
+    setTimeout(function(){ if(gameMode === 'cannon') canNextLevel(); }, 2700);
+    return;
+  }
+  if(cannonLeft <= 0){
+    cannonState = 'lost';
+    sfx.nope();
+    canMsg('OUT OF NOOBS\nback to level 1', 3);
+    setTimeout(function(){
+      if(gameMode !== 'cannon') return;
+      cannonLevel = 1;
+      canStartLevel();
+    }, 3100);
+    return;
+  }
+  cannonState = 'aim';
+  canPaintHud();
+}
+/* d.hit is cleared on every substep, so this has to be read inside the
+   substep loop: once a frame and the big impact is long gone, overwritten
+   by whatever gentler thing he brushed against next. */
+function canHitCheck(){
+  var d = cannonNoob;
+  if(!d || !d.hit || !d.hit.part || d.hit.speed < 5) return;
+  var p = d.hit.part, hard = d.hit.speed;
+  d.hit.part = null;
+  for(var k=0;k<cannonBlocks.length;k++){
+    var b = cannonBlocks[k];
+    if(b.part !== p) continue;
+    if(b.down || hard <= b.tough) return;
+    var vx = (d.P[HIP].x - d.P[HIP].px) / FIXED * 0.25;
+    canTopple(b, vx, 1.2, 0, 6);
+    shake = Math.min(shake + 0.35, 1);
+    return;
+  }
+}
+function stepCannon(dt){
+  acc += dt;
+  var n = 0;
+  while(acc >= FIXED && n < 6){
+    for(var i=0;i<dummies.length;i++) stepDummy(dummies[i]);
+    canHitCheck();
+    acc -= FIXED; n++;
+  }
+  if(n === 6) acc = 0;
+  canStepBlocks(dt);
+  for(var d=0;d<dummies.length;d++){
+    bleedStumps(dummies[d], dt);
+    updateDummy(dummies[d]);
+  }
+  if(cannonState === 'fly'){
+    cannonSettle += dt;
+    var still = true;
+    if(cannonNoob){
+      var v = 0;
+      for(var j=0;j<NJ;j++){
+        var q = cannonNoob.P[j];
+        v += Math.abs(q.x-q.px) + Math.abs(q.y-q.py) + Math.abs(q.z-q.pz);
+      }
+      still = (v / FIXED) < 9;
+    }
+    var settling = cannonFalling.some(function(q){ return !q.landed; });
+    if((still && !settling && cannonSettle > 1.1) || cannonSettle > 9) canCheckRound();
+  }
+  shake *= Math.pow(0.03, dt);
+  canCamera();
+  canPaintHud();
+  if(cannonMsgT > 0){ cannonMsgT -= dt; if(cannonMsgT <= 0) $('canMsg').hidden = true; }
+}
+function startCannon(){
+  $('fpsHud').hidden = true;
+  $('fpsPickBar').hidden = true;
+  $('fpsTripleWrap').hidden = true;
+  $('homeScreen').hidden = true;
+  $('bottom').hidden = true;
+  $('touch').hidden = true;
+  $('toolbar').hidden = true;
+  $('runbar').hidden = true;
+  $('summary').hidden = true;
+  $('fightBars').hidden = true;
+  $('fightMsg').hidden = true;
+  $('storyPanel').hidden = true;
+  $('btnShowText').hidden = true;
+  document.body.classList.remove('mode-slice');
+  noob.visible = false;
+  bones.visible = false;
+  gameMode = 'cannon';
+  mode = 'done';
+  grab = null;
+  clearShards(true);
+  clearFighters();
+  clearDummies();
+  if(!cannonDots.length) canMakeDots();
+  cannonLevel = 1;
+  $('canHud').hidden = false;
+  canStartLevel();
 }
 
 /* ============================ slash trail ============================ */
@@ -4486,6 +4907,8 @@ function showHome(){
   $('fpsHud').classList.remove('picking');
   $('fpsPickBar').hidden = true;
   $('fpsTripleWrap').hidden = true;
+  $('canHud').hidden = true;
+  cannonAim = null;
   fpsFiring = false;
   fpsExitLock();
   charging = false; power = 0;
@@ -4508,6 +4931,7 @@ function showHome(){
   $('homeLevel').textContent = 'Level ' + level;
 }
 function startTower(){
+  $('canHud').hidden = true;
   $('fpsHud').hidden = true;
   $('fpsPickBar').hidden = true;
   $('fpsTripleWrap').hidden = true;
@@ -4530,6 +4954,7 @@ function startTower(){
   announceLevel();
 }
 function startSlice(){
+  $('canHud').hidden = true;
   $('fpsHud').hidden = true;
   $('fpsPickBar').hidden = true;
   $('fpsTripleWrap').hidden = true;
@@ -4979,6 +5404,7 @@ function showStoryNode(key){
   }
 }
 function startStory(){
+  $('canHud').hidden = true;
   $('fpsHud').hidden = true;
   $('fpsPickBar').hidden = true;
   $('fpsTripleWrap').hidden = true;
@@ -5044,6 +5470,7 @@ function stepStory(dt){
   stepAnim(dt);
 }
 function startArena(){
+  $('canHud').hidden = true;
   $('fpsHud').hidden = true;
   $('fpsPickBar').hidden = true;
   $('fpsTripleWrap').hidden = true;
@@ -5218,6 +5645,7 @@ $('modeSlice').addEventListener('click', function(){ sfx.wake(); startSlice(); }
 $('modeArena').addEventListener('click', function(){ sfx.wake(); startArena(); });
 $('modeStory').addEventListener('click', function(){ sfx.wake(); startStory(); });
 $('modeFps').addEventListener('click', function(){ sfx.wake(); startFps(); });
+$('modeCannon').addEventListener('click', function(){ sfx.wake(); startCannon(); });
 $('fpsGo').addEventListener('click', function(){ sfx.wake(); fpsBegin(); });
 window.addEventListener('focus', function(){ if(gameMode === 'fps' && fpsState === 'fight') fpsGrabKeys(); });
 $('fpsHome').addEventListener('click', function(){ sfx.wake(); showHome(); });
@@ -5379,6 +5807,12 @@ if(window.matchMedia && window.matchMedia('(pointer: coarse)').matches){
 var drag = null;
 renderer.domElement.addEventListener('pointerdown', function(e){
   sfx.wake();
+  if(gameMode === 'cannon'){
+    if(cannonState !== 'aim' || cannonLeft <= 0) return;
+    cannonAim = { id:e.pointerId, x:e.clientX, y:e.clientY };
+    try { renderer.domElement.setPointerCapture(e.pointerId); } catch(err){}
+    return;
+  }
   if(gameMode === 'fps'){
     if(fpsState === 'pick'){ fpsPickAt(e.clientX, e.clientY); return; }
     if(fpsState !== 'fight') return;
@@ -5407,6 +5841,13 @@ renderer.domElement.addEventListener('pointerdown', function(e){
   renderer.domElement.setPointerCapture(e.pointerId);
 });
 renderer.domElement.addEventListener('pointermove', function(e){
+  if(gameMode === 'cannon'){
+    if(cannonAim && cannonAim.id === e.pointerId){
+      var a = canAimFrom(cannonAim.x, cannonAim.y, e.clientX, e.clientY);
+      canShowDots(a.vx, a.vy);
+    }
+    return;
+  }
   if(gameMode === 'fps'){
     if(document.pointerLockElement === renderer.domElement){
       fpsAim((e.movementX || 0) * 0.0026, (e.movementY || 0) * 0.0026);
@@ -5424,6 +5865,15 @@ renderer.domElement.addEventListener('pointermove', function(e){
   drag.x = e.clientX; drag.y = e.clientY;
 });
 function endDrag(e){
+  if(gameMode === 'cannon'){
+    if(cannonAim && cannonAim.id === e.pointerId){
+      var a = canAimFrom(cannonAim.x, cannonAim.y, e.clientX, e.clientY);
+      cannonAim = null;
+      canHideDots();
+      if(a.vx*a.vx + a.vy*a.vy > 25) canLaunch(a.vx, a.vy);
+    }
+    return;
+  }
   if(gameMode === 'fps'){
     fpsFiring = false;
     if(fpsLook && fpsLook.id === e.pointerId) fpsLook = null;
@@ -5480,6 +5930,8 @@ function frame(now){
     stepSlice(dt);
   } else if(gameMode === 'arena'){
     stepArena(dt);
+  } else if(gameMode === 'cannon'){
+    stepCannon(dt);
   } else if(gameMode === 'fps'){
     stepFps(dt);
   } else if(gameMode === 'story'){
@@ -5555,7 +6007,7 @@ function frame(now){
     updateStumps(dt);
   }
   updateShards(dt);
-  if(gameMode !== 'fps') updateCamera(dt);
+  if(gameMode !== 'fps' && gameMode !== 'cannon') updateCamera(dt);
   updatePops(dt, W, H);
   drawTrail(dt);
   updateHud(dt);
