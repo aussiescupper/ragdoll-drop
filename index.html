@@ -525,7 +525,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v48</div>
+<div id="verTag">v49</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -549,7 +549,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v48</p>
+    <p class="home-ver" id="homeVer">v49</p>
   </div>
 </section>
 
@@ -732,7 +732,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn sheet-close" data-close type="button">Close</button>
   <h2 id="helpTitle">How to get rich</h2>
   <p class="sub">Leap off the crate and go limp. Every part your ragdoll smacks pays out &mdash; and every smack x-rays your bones for one second. Hit parts back to back to build a chain multiplier.</p>
-  <p class="sub"><b>A Noob's Day Out</b> is a story you steer. He wakes up in the crate with no memory and no plan, and you pick what he does next. The room changes with the scene and he acts out whatever you choose. Eighteen endings, a <b>Read aloud</b> button if you would rather be told it, and <b>Hide</b> if you just want to watch.</p>
+  <p class="sub"><b>A Noob's Day Out</b> is a story you steer. He wakes up in the crate with no memory and no plan, and you pick what he does next. The room changes with the scene and he acts out whatever you choose. Twenty-seven endings, a <b>Read aloud</b> button if you would rather be told it, and <b>Hide</b> if you just want to watch.</p>
   <p class="sub"><b>Noob Cannon</b> is the one with the tower. Drag back from the launch platform and let go, like a catapult &mdash; a dotted line shows where he will go. Knock down the number of blocks named at the top and the next tower is taller; run out of noobs before you get there and you go back to level one. If a tower is beating you, <b>Call in bombs</b> spends $400 on four of them falling out of the sky onto it, and costs you no noobs. Take the legs out from under it rather than picking at the top: anything left with nothing underneath comes down on its own, and a falling block takes out whatever it lands across.</p>
   <p class="sub"><b>Last Noob Standing</b> is the first-person one. Pick who you are fighting from a roster of noobs with made-up names and a skill rating out of 99 &mdash; the rating is real, and it drives how fast they move, how straight they shoot and how much they can take. The <b>Triple mode</b> button at the bottom deals out six of them instead of three and lets you take on three at once for half as much again. In the pit: <kbd>W A S D</kbd> to walk, move the mouse to look, click to shoot. On a tablet a thumbstick appears wherever your left thumb lands and walks you, dragging the right of the screen looks around, and the red button fires. Knives, pistols, SMGs, shotguns and rifles lie about on the sand &mdash; walk over one to pick it up, and they come back a few seconds after somebody takes them. You start with your fists. Headshots pay double and often take the head clean off.</p>
   <p class="sub"><b>Colosseum</b> pits two noobs against each other. Pick a weapon and armour for each &mdash; sword, axe, spear or club, bare, leather or iron &mdash; then set them loose. They walk each other down and swing until one of them stops getting up. The winner pays out.</p>
@@ -3104,7 +3104,8 @@ var STORY = {
     opts:[ {t:"Jump", to:'jump', fx:'drop'},
            {t:"Take the stairs", to:'stairs', fx:'walk'},
            {t:"Read the back of the sign", to:'sign', fx:'look'},
-           {t:"Shout for help", to:'echo', fx:'nod'} ] },
+           {t:"Shout for help", to:'echo', fx:'nod'},
+           {t:"Kick the sign off the tower", to:'kicksign', fx:'kick'} ] },
 
   sign: { face:'flat', scene:'crate', where:'The back of the sign', text:"<b>NO REFUNDS. NO LIMBS RETURNED. PLEASE ENJOY YOUR DROP.</b> There is a tick-box marked 'I have read and understood'. You cannot tick it. You have no pen, and on closer inspection, no thumbs.",
     opts:[ {t:"Jump", to:'jump', fx:'drop'},
@@ -3123,7 +3124,8 @@ var STORY = {
            {t:"The painted door, obviously", to:'painted', fx:'fling'},
            {t:"Look up at where the voice comes from", to:'voice', fx:'look'},
            {t:"Use the vending machine", to:'vending', fx:'walk'},
-           {t:"Get in the lift", to:'lift', fx:'walk'} ] },
+           {t:"Get in the lift", to:'lift', fx:'walk'},
+           {t:"Knock on the painted door", to:'knock', fx:'nod'} ] },
 
   painted: { face:'dizzy', scene:'ground', where:'The painted door', text:"You approach at a brisk walk. The wall is unmoved. There is now a noob-shaped dent in the painted door, which most visitors agree improves it.",
     opts:[ {t:"Again. Harder.", to:'endWall', fx:'fling'},
@@ -3132,6 +3134,7 @@ var STORY = {
   lab: { scene:'lab', where:'The lab', text:"A room with four noobs standing in a very tidy row, all facing front, all smiling. A sword floats in the air above them, held by nobody at all. One of the four catches your eye and gives the smallest possible shake of his head.",
     opts:[ {t:"Take the sword", to:'sword', fx:'sword'},
            {t:"Join the row. Face front. Smile.", to:'endRow', fx:'crowd'},
+           {t:"Ask the four of them a question", to:'question', fx:'think'},
            {t:"Leave at speed", to:'ground', fx:'walk'} ] },
 
   sword: { face:'happy', scene:'lab', where:'Holding the sword', text:"You take the sword. The sword seems delighted. The four noobs do not. After a pause, one of them says, very quietly, \"that's Gary's\".",
@@ -3145,7 +3148,8 @@ var STORY = {
   arena: { scene:'arena', where:'The arena', text:"Sand, high walls and a crowd of precisely nobody. A voice from the ceiling asks what you would like to be beaten to death with today. It sounds bored. It sounds like it asks this a lot.",
     opts:[ {t:"\"An axe, please\"", to:'fight'},
            {t:"\"Nothing. I'll talk him round.\"", to:'talk'},
-           {t:"\"A strongly worded letter\"", to:'letter'} ] },
+           {t:"\"A strongly worded letter\"", to:'letter'},
+           {t:"Dance instead", to:'dancing', fx:'dance'} ] },
 
   letter: { face:'flat', scene:'arena', where:'Armed with stationery', text:"You are handed a strongly worded letter. Your opponent is handed an axe. You point out the imbalance. The voice from the ceiling says \"seems fair\" and goes to lunch.",
     opts:[ {t:"Read the letter aloud with feeling", to:'endLetter', fx:'slice'} ] },
@@ -3188,8 +3192,50 @@ var STORY = {
   roof: { face:'happy', scene:'roof', where:'The roof', text:"The roof. Wind, a low parapet, and the whole building spread out beneath you. From up here the tower looks a great deal taller than it did from inside it, which is the main thing roofs are for.",
     opts:[ {t:"Jump off the roof", to:'endRoofJump', fx:'drop'},
            {t:"Live up here now", to:'endRoof', fx:'sit'},
+           {t:"Say hello to the pigeon", to:'pigeon', fx:'salute'},
            {t:"Take the lift back down", to:'endLift', fx:'walk'} ] },
 
+  knock: { face:'flat', scene:'ground', where:'The painted door', text:"You knock on the painted door. The painted door, being paint, does not answer. You wait the length of time it is polite to wait, and then a little longer, because you are not certain what the rule is for walls.",
+    opts:[ {t:"Knock again, more politely", to:'knock2', fx:'nod'},
+           {t:"Try the painted handle", to:'handle', fx:'think'},
+           {t:"Give up and turn round", to:'ground', fx:'walk'} ] },
+
+  knock2: { face:'shock', scene:'ground', where:'Still knocking', text:"You knock again, softer, in case the first one was rude. Somewhere behind you, very quietly, somebody knocks back. You turn round. There is nobody there. There is another painted door, and it was not there before.",
+    opts:[ {t:"Knock on that one as well", to:'endKnock', fx:'nod'},
+           {t:"Leave. Leave now.", to:'ground', fx:'walk'} ] },
+
+  handle: { face:'flat', scene:'ground', where:'The handle', text:"You reach for the painted handle. Your hand and your confidence arrive at the wall at the same moment and go through the same experience together. The handle remains a handle-coloured shape.",
+    opts:[ {t:"Pull anyway. Commit.", to:'endHandle', fx:'fling'},
+           {t:"Concede the wall this one", to:'ground', fx:'shake'} ] },
+
+  kicksign: { face:'angry', scene:'crate', where:'The sign', text:"You kick the sign that says THIS IS FINE. It leaves the wall with the sound of a small opinion being ended and falls forty metres. A long time later, something down there says OW.",
+    opts:[ {t:"Apologise down the shaft", to:'endSorry', fx:'nod'},
+           {t:"Follow the sign down", to:'jump', fx:'drop'} ] },
+
+  pigeon: { face:'happy', scene:'roof', where:'The pigeon', text:"There is a pigeon on the parapet. It has one leg, the confidence of something with four, and it is looking at you the way a landlord looks at a tenant.",
+    opts:[ {t:"Offer it the building", to:'endPigeon', fx:'salute'},
+           {t:"Ask it to fly you down", to:'endFly', fx:'wave'},
+           {t:"Back slowly away from the pigeon", to:'roof', fx:'shiver'} ] },
+
+  question: { face:'flat', scene:'lab', where:'A question', text:"You ask the four noobs what they are waiting for. Three of them go on smiling at the front wall. The fourth says <b>Tuesday</b>, and when you ask which Tuesday he says <b>yes</b> and returns to smiling.",
+    opts:[ {t:"Wait for Tuesday with them", to:'endTuesday', fx:'sit'},
+           {t:"Tell them it is already Tuesday", to:'endLie', fx:'think'},
+           {t:"Leave before Tuesday arrives", to:'ground', fx:'walk'} ] },
+
+  dancing: { face:'happy', scene:'arena', where:'Dancing', text:"You dance. The other noob stops with the axe half raised and watches. The voice in the ceiling says nothing for eleven seconds, which is the longest silence of its entire career.",
+    opts:[ {t:"Keep dancing. Do not stop.", to:'endDance', fx:'dance'},
+           {t:"Teach him the dance", to:'endTeach', fx:'wave'},
+           {t:"Stop, and fight after all", to:'fight', fx:'slice'} ] },
+
+  endKnock: { face:'shock', where:'Ending', end:true, pay:290, text:"<b>THE END: Answered.</b> You knock on the second door. A third appears. You work along the wall for most of a week, knocking and being knocked back at, and by Friday the whole ground floor is doors. None of them open. All of them are polite." },
+  endHandle: { face:'dizzy', where:'Ending', end:true, pay:210, text:"<b>THE END: Handled.</b> You pull. The wall, to everyone's considerable surprise including its own, comes away in one piece, and behind it is the rest of the wall. You are left holding a door-shaped rectangle of building and no way to put it back." },
+  endSorry: { face:'flat', where:'Ending', end:true, pay:260, text:"<b>THE END: OW.</b> You apologise down the shaft. The shaft says it is fine. You say it is clearly not fine. The shaft says it is FINE, in the voice people use when it is not, and neither of you speaks again for the rest of the afternoon." },
+  endPigeon: { face:'happy', where:'Ending', end:true, pay:520, text:"<b>THE END: Management.</b> You offer the pigeon the building. It accepts on the spot, with no questions, which suggests it had already been running the place for some time. You are kept on. Your duties are unclear and your line manager has one leg." },
+  endFly: { face:'shock', where:'Ending', end:true, pay:340, text:"<b>THE END: One Leg.</b> The pigeon considers the request, looks at you, looks at the forty metres, and looks back at you with an expression that has ended friendships. It takes off without you. It was, to be fair to it, never going to work." },
+  endTuesday: { face:'flat', where:'Ending', end:true, pay:360, text:"<b>THE END: Tuesday.</b> You sit down with them and face the front wall. It is not Tuesday. It will be Tuesday. In the meantime the smiling is easier than you expected, and the wall turns out to have a great deal in it once you give it your full attention." },
+  endLie: { face:'happy', where:'Ending', end:true, pay:430, text:"<b>THE END: It Is Tuesday.</b> You tell them it is Tuesday. All four turn their heads at once, which is the first thing any of them has done in years, and file out past you without a word. You never learn what Tuesday was for. You suspect it was not your business." },
+  endDance: { face:'happy', where:'Ending', end:true, pay:600, text:"<b>THE END: The Dance.</b> You do not stop. The other noob puts the axe down. The voice in the ceiling comes back on, clears its throat, and asks whether you are available on weekends. The arena is repurposed by the end of the month." },
+  endTeach: { face:'happy', where:'Ending', end:true, pay:480, text:"<b>THE END: Two Dancers.</b> He is not good at it. He is enormous and he is holding an axe and his sense of rhythm is a rumour, but he is trying, and nobody in this building has tried at anything for a very long time." },
   endEat: { face:'sick', where:'Ending', end:true, pay:120, text:"<b>THE END: Box Within A Box.</b> You eat the entire crate. With nothing left to stand on you fall forty metres, which technically means you were inside the crate the whole way down. A judge later rules this a draw." },
   endFloor: { face:'flat', where:'Ending', end:true, pay:90, text:"<b>THE END: Horizontal.</b> You stay down for eleven days. Staff begin to route around you. Somebody puts a plant on you. You are, at last, part of the building." },
   endWall: { face:'dizzy', where:'Ending', end:true, pay:150, text:"<b>THE END: Mural.</b> On the fourth attempt you go through the painted door entirely, which surprises everyone including the wall. On the other side is more wall. You are now part of the artwork and, frankly, its best feature." },
@@ -5366,6 +5412,30 @@ function stepAnim(dt){
   } else if(k === 'look'){
     d.P[HEAD].py -= 2.2*FIXED;
     if(t > 0.35) anim.kind = null;
+  } else if(k === 'dance'){
+    /* one arm is all the pose system drives, so the hips do the rest */
+    d.poseArm = [0.85 + Math.sin(t*9)*0.75, 3.35 + Math.sin(t*9)*0.85, 0.25];
+    d.P[HIP].px -= Math.sin(t*9) * 1.5 * FIXED;
+    d.P[HEAD].px -= Math.sin(t*9 + 0.6) * 0.8 * FIXED;
+    if(t > 2.8){ d.poseArm = null; anim.kind = null; }
+  } else if(k === 'think'){
+    d.poseArm = [0.40, 3.5, 0.55];              /* hand up by his chin */
+    d.P[HEAD].px -= 0.7 * FIXED;                /* head tips over with it */
+    if(t > 1.9){ d.poseArm = null; anim.kind = null; }
+  } else if(k === 'kick'){
+    if(t < 0.26){ d.P[FTR].pz += 7.5*FIXED; d.P[FTR].py -= 1.2*FIXED; }
+    if(t > 1.0) anim.kind = null;
+  } else if(k === 'shiver'){
+    for(i=0;i<NJ;i++) d.P[i].px -= (Math.random()-0.5) * 1.2 * FIXED;
+    if(t > 1.5) anim.kind = null;
+  } else if(k === 'salute'){
+    d.poseArm = [0.5, 3.95, 0.1];
+    if(t > 1.7){ d.poseArm = null; anim.kind = null; }
+  } else if(k === 'faint'){
+    /* he goes properly limp: the posture spring is what keeps him up */
+    d.noStand = true;
+    if(t < 0.06){ for(i=0;i<NJ;i++){ d.P[i].pz -= 2.4*FIXED; d.P[i].py += 1.0*FIXED; } }
+    if(t > 2.8){ d.noStand = false; anim.kind = null; }
   } else if(k === 'eat'){
     /* walk to the rim, bend over it, chomp, then chew the chunk out of his own hand */
     var T_BITE = 0.8, T_CHEW = 2.4, T_END = 3.2, u, q, ty, tz, sc, hd, want;
@@ -5642,7 +5712,8 @@ function speakStory(){
     window.speechSynthesis.speak(u);
   } catch(e){ stopSpeech(); }
 }
-var ANIMS = { wave:1, lean:1, walk:1, nod:1, shake:1, hop:1, sit:1, look:1 };
+var ANIMS = { wave:1, lean:1, walk:1, nod:1, shake:1, hop:1, sit:1, look:1,
+              dance:1, think:1, kick:1, shiver:1, salute:1, faint:1 };
 function storyFx(fx){
   var d = storyNoob, i;
   if(!d || !fx) return;
