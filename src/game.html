@@ -501,7 +501,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v49</div>
+<div id="verTag">v50</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -525,7 +525,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v49</p>
+    <p class="home-ver" id="homeVer">v50</p>
   </div>
 </section>
 
@@ -3076,18 +3076,18 @@ var STORY = {
     opts:[ {t:"Keep eating. Commit.", to:'endEat', fx:'bite'},
            {t:"Climb out with your dignity", to:'ledge', fx:'hop'} ] },
 
-  ledge: { scene:'crate', where:'The edge', text:"The lip of the crate. Below you: forty metres of scaffolding, tilted girders, panes of glass and a surprising number of swords bolted to the walls at head height. A small sign says <b>THIS IS FINE</b>.",
+  ledge: { dress:['sign'], scene:'crate', where:'The edge', text:"The lip of the crate. Below you: forty metres of scaffolding, tilted girders, panes of glass and a surprising number of swords bolted to the walls at head height. A small sign says <b>THIS IS FINE</b>.",
     opts:[ {t:"Jump", to:'jump', fx:'drop'},
            {t:"Take the stairs", to:'stairs', fx:'walk'},
            {t:"Read the back of the sign", to:'sign', fx:'look'},
            {t:"Shout for help", to:'echo', fx:'nod'},
            {t:"Kick the sign off the tower", to:'kicksign', fx:'kick'} ] },
 
-  sign: { face:'flat', scene:'crate', where:'The back of the sign', text:"<b>NO REFUNDS. NO LIMBS RETURNED. PLEASE ENJOY YOUR DROP.</b> There is a tick-box marked 'I have read and understood'. You cannot tick it. You have no pen, and on closer inspection, no thumbs.",
+  sign: { dress:['sign'], face:'flat', scene:'crate', where:'The back of the sign', text:"<b>NO REFUNDS. NO LIMBS RETURNED. PLEASE ENJOY YOUR DROP.</b> There is a tick-box marked 'I have read and understood'. You cannot tick it. You have no pen, and on closer inspection, no thumbs.",
     opts:[ {t:"Jump", to:'jump', fx:'drop'},
            {t:"Look for the stairs", to:'stairs', fx:'walk'} ] },
 
-  stairs: { face:'shock', scene:'crate', where:'Looking for the stairs', text:"There are no stairs. There have never been stairs. You look for them for six minutes, which is precisely long enough for the crate to notice you are standing on the very edge of it, and to do something about that.",
+  stairs: { dress:['sign'], face:'shock', scene:'crate', where:'Looking for the stairs', text:"There are no stairs. There have never been stairs. You look for them for six minutes, which is precisely long enough for the crate to notice you are standing on the very edge of it, and to do something about that.",
     opts:[ {t:"Fall with as much dignity as you can manage", to:'jump', fx:'drop'} ] },
 
   jump: { face:'shock', scene:'tower', where:'In the air', text:"You meet, in order: a girder, a pane of glass, a gold brick that seemed very pleased about it, and a bouncer that fires you back up to meet the girder a second time. You land. You are, against all expectation, mostly here.",
@@ -3122,12 +3122,12 @@ var STORY = {
            {t:"Take Gary to the arena anyway", to:'arena', fx:'walk'} ] },
 
   arena: { scene:'arena', where:'The arena', text:"Sand, high walls and a crowd of precisely nobody. A voice from the ceiling asks what you would like to be beaten to death with today. It sounds bored. It sounds like it asks this a lot.",
-    opts:[ {t:"\"An axe, please\"", to:'fight'},
-           {t:"\"Nothing. I'll talk him round.\"", to:'talk'},
-           {t:"\"A strongly worded letter\"", to:'letter'},
+    opts:[ {t:"\"An axe, please\"", to:'fight', fx:'nod'},
+           {t:"\"Nothing. I'll talk him round.\"", to:'talk', fx:'wave'},
+           {t:"\"A strongly worded letter\"", to:'letter', fx:'think'},
            {t:"Dance instead", to:'dancing', fx:'dance'} ] },
 
-  letter: { face:'flat', scene:'arena', where:'Armed with stationery', text:"You are handed a strongly worded letter. Your opponent is handed an axe. You point out the imbalance. The voice from the ceiling says \"seems fair\" and goes to lunch.",
+  letter: { dress:['letter'], face:'flat', scene:'arena', where:'Armed with stationery', text:"You are handed a strongly worded letter. Your opponent is handed an axe. You point out the imbalance. The voice from the ceiling says \"seems fair\" and goes to lunch.",
     opts:[ {t:"Read the letter aloud with feeling", to:'endLetter', fx:'slice'} ] },
 
   talk: { face:'happy', scene:'arena', where:'Negotiating', text:"You explain to the other noob that neither of you asked for this, that you are both just boxes with faces, and that the real tower was the friends we made along the way. He listens. He nods. He is, it turns out, entirely persuaded.",
@@ -3138,30 +3138,30 @@ var STORY = {
     opts:[ {t:"Keep going", to:'endFight', fx:'slice'},
            {t:"Lie down and let the arm finish it", to:'endArm', fx:'smash'} ] },
 
-  echo: { face:'shock', scene:'crate', where:'Shouting', text:"You shout HELLO. The tower shouts HELLO back, which is what towers do. Then it shouts HELLO a third time, in a voice that is not yours, from somewhere considerably closer than the far wall.",
+  echo: { dress:['sign'], face:'shock', scene:'crate', where:'Shouting', text:"You shout HELLO. The tower shouts HELLO back, which is what towers do. Then it shouts HELLO a third time, in a voice that is not yours, from somewhere considerably closer than the far wall.",
     opts:[ {t:"Shout HELLO again", to:'endEcho', fx:'nod'},
            {t:"Stop shouting immediately", to:'ledge', fx:'look'},
            {t:"Jump, for entirely unrelated reasons", to:'jump', fx:'drop'} ] },
 
-  voice: { face:'shock', scene:'ground', where:'Looking up', text:"You look up. There is no voice in the ceiling. There is a speaker, and beside it a small window, and behind the window a noob with a clipboard who has been watching you this whole time and has written several things down.",
+  voice: { dress:['window'], face:'shock', scene:'ground', where:'Looking up', text:"You look up. There is no voice in the ceiling. There is a speaker, and beside it a small window, and behind the window a noob with a clipboard who has been watching you this whole time and has written several things down.",
     opts:[ {t:"Wave at him", to:'endWave', fx:'wave'},
            {t:"Ask him for his job", to:'job', fx:'nod'},
            {t:"Pretend you saw nothing", to:'ground', fx:'walk'} ] },
 
-  job: { face:'happy', scene:'ground', where:'The interview', text:"He slides the window open and asks whether you have relevant experience. You tell him you have fallen off this tower eleven times. He writes that down too, and says it is eleven more times than anyone currently on the payroll.",
+  job: { dress:['window'], face:'happy', scene:'ground', where:'The interview', text:"He slides the window open and asks whether you have relevant experience. You tell him you have fallen off this tower eleven times. He writes that down too, and says it is eleven more times than anyone currently on the payroll.",
     opts:[ {t:"Take the job", to:'endVoice', fx:'nod'},
            {t:"Ask about the pay first", to:'endPay', fx:'shake'} ] },
 
-  vending: { scene:'ground', where:'The machine', text:"There is a vending machine beside the painted door. The top row is crisps. The second row is arms. The third row is also arms. A handwritten note taped to the glass reads <b>ARMS NON-RETURNABLE</b>.",
+  vending: { dress:['vending'], scene:'ground', where:'The machine', text:"There is a vending machine beside the painted door. The top row is crisps. The second row is arms. The third row is also arms. A handwritten note taped to the glass reads <b>ARMS NON-RETURNABLE</b>.",
     opts:[ {t:"Buy an arm", to:'armswap', fx:'nod'},
            {t:"Buy the crisps", to:'endCrisps', fx:'shake'},
            {t:"Back away slowly", to:'ground', fx:'walk'} ] },
 
-  armswap: { face:'dizzy', scene:'ground', where:'Two left arms', text:"The machine drops a left arm into the tray. You already own a left arm. You now own two, and the new one is a size and a half too big, a different colour, and faintly warm.",
+  armswap: { dress:['vending','arm'], face:'dizzy', scene:'ground', where:'Two left arms', text:"The machine drops a left arm into the tray. You already own a left arm. You now own two, and the new one is a size and a half too big, a different colour, and faintly warm.",
     opts:[ {t:"Attach it. More arms is more arms.", to:'endArmSwap', fx:'slice'},
            {t:"Leave it in the tray for the next noob", to:'ground', fx:'walk'} ] },
 
-  lift: { face:'flat', scene:'ground', where:'The lift', text:"A lift you had somehow not noticed. Inside there is one button, marked UP. There is no second button. There is a worn patch on the wall at head height where a great many people have clearly looked for one.",
+  lift: { dress:['lift'], face:'flat', scene:'ground', where:'The lift', text:"A lift you had somehow not noticed. Inside there is one button, marked UP. There is no second button. There is a worn patch on the wall at head height where a great many people have clearly looked for one.",
     opts:[ {t:"Press UP", to:'roof', fx:'nod'},
            {t:"Search for a DOWN button", to:'endLift', fx:'shake'} ] },
 
@@ -3176,7 +3176,7 @@ var STORY = {
            {t:"Try the painted handle", to:'handle', fx:'think'},
            {t:"Give up and turn round", to:'ground', fx:'walk'} ] },
 
-  knock2: { face:'shock', scene:'ground', where:'Still knocking', text:"You knock again, softer, in case the first one was rude. Somewhere behind you, very quietly, somebody knocks back. You turn round. There is nobody there. There is another painted door, and it was not there before.",
+  knock2: { dress:['paintdoor2'], face:'shock', scene:'ground', where:'Still knocking', text:"You knock again, softer, in case the first one was rude. Somewhere behind you, very quietly, somebody knocks back. You turn round. There is nobody there. There is another painted door, and it was not there before.",
     opts:[ {t:"Knock on that one as well", to:'endKnock', fx:'nod'},
            {t:"Leave. Leave now.", to:'ground', fx:'walk'} ] },
 
@@ -3184,11 +3184,11 @@ var STORY = {
     opts:[ {t:"Pull anyway. Commit.", to:'endHandle', fx:'fling'},
            {t:"Concede the wall this one", to:'ground', fx:'shake'} ] },
 
-  kicksign: { face:'angry', scene:'crate', where:'The sign', text:"You kick the sign that says THIS IS FINE. It leaves the wall with the sound of a small opinion being ended and falls forty metres. A long time later, something down there says OW.",
+  kicksign: { dress:['signgone'], face:'angry', scene:'crate', where:'The sign', text:"You kick the sign that says THIS IS FINE. It leaves the wall with the sound of a small opinion being ended and falls forty metres. A long time later, something down there says OW.",
     opts:[ {t:"Apologise down the shaft", to:'endSorry', fx:'nod'},
            {t:"Follow the sign down", to:'jump', fx:'drop'} ] },
 
-  pigeon: { face:'happy', scene:'roof', where:'The pigeon', text:"There is a pigeon on the parapet. It has one leg, the confidence of something with four, and it is looking at you the way a landlord looks at a tenant.",
+  pigeon: { dress:['pigeon'], face:'happy', scene:'roof', where:'The pigeon', text:"There is a pigeon on the parapet. It has one leg, the confidence of something with four, and it is looking at you the way a landlord looks at a tenant.",
     opts:[ {t:"Offer it the building", to:'endPigeon', fx:'salute'},
            {t:"Ask it to fly you down", to:'endFly', fx:'wave'},
            {t:"Back slowly away from the pigeon", to:'roof', fx:'shiver'} ] },
@@ -3203,33 +3203,33 @@ var STORY = {
            {t:"Teach him the dance", to:'endTeach', fx:'wave'},
            {t:"Stop, and fight after all", to:'fight', fx:'slice'} ] },
 
-  endKnock: { face:'shock', where:'Ending', end:true, pay:290, text:"<b>THE END: Answered.</b> You knock on the second door. A third appears. You work along the wall for most of a week, knocking and being knocked back at, and by Friday the whole ground floor is doors. None of them open. All of them are polite." },
-  endHandle: { face:'dizzy', where:'Ending', end:true, pay:210, text:"<b>THE END: Handled.</b> You pull. The wall, to everyone's considerable surprise including its own, comes away in one piece, and behind it is the rest of the wall. You are left holding a door-shaped rectangle of building and no way to put it back." },
-  endSorry: { face:'flat', where:'Ending', end:true, pay:260, text:"<b>THE END: OW.</b> You apologise down the shaft. The shaft says it is fine. You say it is clearly not fine. The shaft says it is FINE, in the voice people use when it is not, and neither of you speaks again for the rest of the afternoon." },
-  endPigeon: { face:'happy', where:'Ending', end:true, pay:520, text:"<b>THE END: Management.</b> You offer the pigeon the building. It accepts on the spot, with no questions, which suggests it had already been running the place for some time. You are kept on. Your duties are unclear and your line manager has one leg." },
-  endFly: { face:'shock', where:'Ending', end:true, pay:340, text:"<b>THE END: One Leg.</b> The pigeon considers the request, looks at you, looks at the forty metres, and looks back at you with an expression that has ended friendships. It takes off without you. It was, to be fair to it, never going to work." },
-  endTuesday: { face:'flat', where:'Ending', end:true, pay:360, text:"<b>THE END: Tuesday.</b> You sit down with them and face the front wall. It is not Tuesday. It will be Tuesday. In the meantime the smiling is easier than you expected, and the wall turns out to have a great deal in it once you give it your full attention." },
-  endLie: { face:'happy', where:'Ending', end:true, pay:430, text:"<b>THE END: It Is Tuesday.</b> You tell them it is Tuesday. All four turn their heads at once, which is the first thing any of them has done in years, and file out past you without a word. You never learn what Tuesday was for. You suspect it was not your business." },
-  endDance: { face:'happy', where:'Ending', end:true, pay:600, text:"<b>THE END: The Dance.</b> You do not stop. The other noob puts the axe down. The voice in the ceiling comes back on, clears its throat, and asks whether you are available on weekends. The arena is repurposed by the end of the month." },
-  endTeach: { face:'happy', where:'Ending', end:true, pay:480, text:"<b>THE END: Two Dancers.</b> He is not good at it. He is enormous and he is holding an axe and his sense of rhythm is a rumour, but he is trying, and nobody in this building has tried at anything for a very long time." },
-  endEat: { face:'sick', where:'Ending', end:true, pay:120, text:"<b>THE END: Box Within A Box.</b> You eat the entire crate. With nothing left to stand on you fall forty metres, which technically means you were inside the crate the whole way down. A judge later rules this a draw." },
-  endFloor: { face:'flat', where:'Ending', end:true, pay:90, text:"<b>THE END: Horizontal.</b> You stay down for eleven days. Staff begin to route around you. Somebody puts a plant on you. You are, at last, part of the building." },
-  endWall: { face:'dizzy', where:'Ending', end:true, pay:150, text:"<b>THE END: Mural.</b> On the fourth attempt you go through the painted door entirely, which surprises everyone including the wall. On the other side is more wall. You are now part of the artwork and, frankly, its best feature." },
-  endRow: { face:'flat', where:'Ending', end:true, pay:200, text:"<b>THE END: Fifth From The Left.</b> You join the row. You face front. You smile. Nothing happens for a long time, and then a sword happens quite quickly. The other four do not turn their heads. They have seen this." },
-  endGary: { face:'happy', where:'Ending', end:true, pay:450, text:"<b>THE END: Gary's Friend.</b> You apologise. Gary, who has never once been apologised to, is deeply moved. He puts himself back on the rack. You walk out of the building on both legs, which nobody has ever done before." },
-  endLetter: { face:'frown', where:'Ending', end:true, pay:300, text:"<b>THE END: Strongly Worded.</b> You lose, immediately and comprehensively. But the letter is read aloud at the memorial and there is not a dry face in the room, largely because the faces are painted on." },
-  endFriend: { face:'happy', where:'Ending', end:true, pay:500, text:"<b>THE END: The Real Tower.</b> You shake hands. The ceiling voice, who has not seen a handshake in nine years, quietly resigns. The four noobs from the lab come out to see. Somebody brings a second crate. It is, by the standards of this building, a triumph." },
-  endFight: { face:'angry', where:'Ending', end:true, pay:350, text:"<b>THE END: Winner.</b> You win, in the sense that you are the one still standing, and standing is doing a lot of work in that sentence. You are awarded the arena. You cannot carry it home. You have no arms." },
-  endEcho: { face:'shock', where:'Ending', end:true, pay:180, text:"<b>THE END: Hello.</b> You and the other voice shout HELLO at one another for two hours. Neither of you says anything else. It is the longest and warmest conversation either of you has ever had, and you never do establish where he was standing." },
-  endWave: { face:'happy', where:'Ending', end:true, pay:140, text:"<b>THE END: Noted.</b> You wave. He waves back, then writes down that you waved. The window closes. You are, as far as anyone can establish, the first noob in the history of the building to be waved at, and it goes in the annual report." },
-  endVoice: { face:'flat', where:'Ending', end:true, pay:550, text:"<b>THE END: The Voice.</b> You take the job. You spend the rest of your days behind the little window asking noobs what they would like to be beaten to death with, in a voice that gets flatter every year. You are extremely good at it. You are never once thanked." },
-  endPay: { face:'frown', where:'Ending', end:true, pay:220, text:"<b>THE END: Negotiation.</b> You ask about the pay. He looks at you for a long moment, closes the window, and switches the speaker back on. The offer is withdrawn. Somewhere below you, a door marked ARENA unlocks by itself." },
-  endCrisps: { face:'angry', where:'Ending', end:true, pay:60, text:"<b>THE END: Crisps.</b> You buy the crisps. They catch on the way down, held up by a single arm. You rock the machine. The machine rocks back. They find the pair of you much later, neither willing to give ground." },
-  endArmSwap: { face:'dizzy', where:'Ending', end:true, pay:260, text:"<b>THE END: Three Arms.</b> You attach it. It does not match, it does not fit and it does not do what it is told. Within a week it has opinions. Within a month it is making the decisions, and frankly things run rather better." },
-  endLift: { face:'flat', where:'Ending', end:true, pay:130, text:"<b>THE END: Up Only.</b> You look for the DOWN button for a very long time. The lift waits with you, patiently, going up. There is always more up. Nobody has established where it ends, and nobody who went to find out has come back to say." },
-  endRoof: { face:'happy', where:'Ending', end:true, pay:330, text:"<b>THE END: Roof Noob.</b> You live on the roof and never come down. In time the noobs below begin leaving small offerings at the foot of the lift, mostly crisps, those being the one thing the machine reliably gives up." },
-  endRoofJump: { face:'shock', where:'Ending', end:true, pay:380, text:"<b>THE END: The Long Way.</b> You jump off the roof, which is the tower plus the roof, which is further than anyone has fallen in this building and is therefore a record. It is written on the back of the sign. There was no room on the front." },
-  endArm: { face:'shock', where:'Ending', end:true, pay:400, text:"<b>THE END: The Arm.</b> Your arm finishes the fight, wins on points, and is carried out shoulder-high, which is the only way anyone could carry it. It does not come back for you. You understand. You would not have come back either." }
+  endKnock: { fx:'nod', dress:['paintdoor2'], face:'shock', where:'Ending', end:true, pay:290, text:"<b>THE END: Answered.</b> You knock on the second door. A third appears. You work along the wall for most of a week, knocking and being knocked back at, and by Friday the whole ground floor is doors. None of them open. All of them are polite." },
+  endHandle: { fx:'fling', face:'dizzy', where:'Ending', end:true, pay:210, text:"<b>THE END: Handled.</b> You pull. The wall, to everyone's considerable surprise including its own, comes away in one piece, and behind it is the rest of the wall. You are left holding a door-shaped rectangle of building and no way to put it back." },
+  endSorry: { fx:'nod', face:'flat', where:'Ending', end:true, pay:260, text:"<b>THE END: OW.</b> You apologise down the shaft. The shaft says it is fine. You say it is clearly not fine. The shaft says it is FINE, in the voice people use when it is not, and neither of you speaks again for the rest of the afternoon." },
+  endPigeon: { fx:'salute', dress:['pigeon'], face:'happy', where:'Ending', end:true, pay:520, text:"<b>THE END: Management.</b> You offer the pigeon the building. It accepts on the spot, with no questions, which suggests it had already been running the place for some time. You are kept on. Your duties are unclear and your line manager has one leg." },
+  endFly: { fx:'wave', dress:['pigeon'], face:'shock', where:'Ending', end:true, pay:340, text:"<b>THE END: One Leg.</b> The pigeon considers the request, looks at you, looks at the forty metres, and looks back at you with an expression that has ended friendships. It takes off without you. It was, to be fair to it, never going to work." },
+  endTuesday: { fx:'sit', face:'flat', where:'Ending', end:true, pay:360, text:"<b>THE END: Tuesday.</b> You sit down with them and face the front wall. It is not Tuesday. It will be Tuesday. In the meantime the smiling is easier than you expected, and the wall turns out to have a great deal in it once you give it your full attention." },
+  endLie: { fx:'think', face:'happy', where:'Ending', end:true, pay:430, text:"<b>THE END: It Is Tuesday.</b> You tell them it is Tuesday. All four turn their heads at once, which is the first thing any of them has done in years, and file out past you without a word. You never learn what Tuesday was for. You suspect it was not your business." },
+  endDance: { fx:'dance', face:'happy', where:'Ending', end:true, pay:600, text:"<b>THE END: The Dance.</b> You do not stop. The other noob puts the axe down. The voice in the ceiling comes back on, clears its throat, and asks whether you are available on weekends. The arena is repurposed by the end of the month." },
+  endTeach: { fx:'dance', face:'happy', where:'Ending', end:true, pay:480, text:"<b>THE END: Two Dancers.</b> He is not good at it. He is enormous and he is holding an axe and his sense of rhythm is a rumour, but he is trying, and nobody in this building has tried at anything for a very long time." },
+  endEat: { fx:'sit', face:'sick', where:'Ending', end:true, pay:120, text:"<b>THE END: Box Within A Box.</b> You eat the entire crate. With nothing left to stand on you fall forty metres, which technically means you were inside the crate the whole way down. A judge later rules this a draw." },
+  endFloor: { fx:'faint', face:'flat', where:'Ending', end:true, pay:90, text:"<b>THE END: Horizontal.</b> You stay down for eleven days. Staff begin to route around you. Somebody puts a plant on you. You are, at last, part of the building." },
+  endWall: { fx:'fling', face:'dizzy', where:'Ending', end:true, pay:150, text:"<b>THE END: Mural.</b> On the fourth attempt you go through the painted door entirely, which surprises everyone including the wall. On the other side is more wall. You are now part of the artwork and, frankly, its best feature." },
+  endRow: { fx:'crowd', face:'flat', where:'Ending', end:true, pay:200, text:"<b>THE END: Fifth From The Left.</b> You join the row. You face front. You smile. Nothing happens for a long time, and then a sword happens quite quickly. The other four do not turn their heads. They have seen this." },
+  endGary: { fx:'nod', face:'happy', where:'Ending', end:true, pay:450, text:"<b>THE END: Gary's Friend.</b> You apologise. Gary, who has never once been apologised to, is deeply moved. He puts himself back on the rack. You walk out of the building on both legs, which nobody has ever done before." },
+  endLetter: { fx:'shake', dress:['letter'], face:'frown', where:'Ending', end:true, pay:300, text:"<b>THE END: Strongly Worded.</b> You lose, immediately and comprehensively. But the letter is read aloud at the memorial and there is not a dry face in the room, largely because the faces are painted on." },
+  endFriend: { fx:'wave', face:'happy', where:'Ending', end:true, pay:500, text:"<b>THE END: The Real Tower.</b> You shake hands. The ceiling voice, who has not seen a handshake in nine years, quietly resigns. The four noobs from the lab come out to see. Somebody brings a second crate. It is, by the standards of this building, a triumph." },
+  endFight: { fx:'slice', face:'angry', where:'Ending', end:true, pay:350, text:"<b>THE END: Winner.</b> You win, in the sense that you are the one still standing, and standing is doing a lot of work in that sentence. You are awarded the arena. You cannot carry it home. You have no arms." },
+  endEcho: { fx:'nod', face:'shock', where:'Ending', end:true, pay:180, text:"<b>THE END: Hello.</b> You and the other voice shout HELLO at one another for two hours. Neither of you says anything else. It is the longest and warmest conversation either of you has ever had, and you never do establish where he was standing." },
+  endWave: { fx:'wave', dress:['window'], face:'happy', where:'Ending', end:true, pay:140, text:"<b>THE END: Noted.</b> You wave. He waves back, then writes down that you waved. The window closes. You are, as far as anyone can establish, the first noob in the history of the building to be waved at, and it goes in the annual report." },
+  endVoice: { fx:'nod', dress:['window'], face:'flat', where:'Ending', end:true, pay:550, text:"<b>THE END: The Voice.</b> You take the job. You spend the rest of your days behind the little window asking noobs what they would like to be beaten to death with, in a voice that gets flatter every year. You are extremely good at it. You are never once thanked." },
+  endPay: { fx:'shake', dress:['window'], face:'frown', where:'Ending', end:true, pay:220, text:"<b>THE END: Negotiation.</b> You ask about the pay. He looks at you for a long moment, closes the window, and switches the speaker back on. The offer is withdrawn. Somewhere below you, a door marked ARENA unlocks by itself." },
+  endCrisps: { fx:'shake', dress:['vending','crisps'], face:'angry', where:'Ending', end:true, pay:60, text:"<b>THE END: Crisps.</b> You buy the crisps. They catch on the way down, held up by a single arm. You rock the machine. The machine rocks back. They find the pair of you much later, neither willing to give ground." },
+  endArmSwap: { fx:'slice', dress:['vending','arm'], face:'dizzy', where:'Ending', end:true, pay:260, text:"<b>THE END: Three Arms.</b> You attach it. It does not match, it does not fit and it does not do what it is told. Within a week it has opinions. Within a month it is making the decisions, and frankly things run rather better." },
+  endLift: { fx:'think', dress:['lift'], face:'flat', where:'Ending', end:true, pay:130, text:"<b>THE END: Up Only.</b> You look for the DOWN button for a very long time. The lift waits with you, patiently, going up. There is always more up. Nobody has established where it ends, and nobody who went to find out has come back to say." },
+  endRoof: { fx:'sit', face:'happy', where:'Ending', end:true, pay:330, text:"<b>THE END: Roof Noob.</b> You live on the roof and never come down. In time the noobs below begin leaving small offerings at the foot of the lift, mostly crisps, those being the one thing the machine reliably gives up." },
+  endRoofJump: { fx:'drop', face:'shock', where:'Ending', end:true, pay:380, text:"<b>THE END: The Long Way.</b> You jump off the roof, which is the tower plus the roof, which is further than anyone has fallen in this building and is therefore a record. It is written on the back of the sign. There was no room on the front." },
+  endArm: { fx:'faint', face:'shock', where:'Ending', end:true, pay:400, text:"<b>THE END: The Arm.</b> Your arm finishes the fight, wins on points, and is carried out shoulder-high, which is the only way anyone could carry it. It does not come back for you. You understand. You would not have come back either." }
 };
 
 function buildSliceRoom(){
@@ -5657,6 +5657,74 @@ var SCENES = {
     setStoryCam(17, 0.22, 3.2);
   }
 };
+/* The rooms are reused across a lot of nodes, so the things a particular
+   page talks about — the sign, the pigeon, the vending machine, the window
+   with the clipboard behind it — are put in for that page only and taken
+   out again when you leave it. */
+var storyDressed = [];
+function dressProp(hex, sx, sy, sz, x, y, z, yaw){
+  var m = prop(hex, sx, sy, sz, x, y, z, yaw);
+  storyDressed.push(m);
+  return m;
+}
+function clearDress(){
+  for(var i=0;i<storyDressed.length;i++){
+    scene.remove(storyDressed[i]);
+    var k = decor.indexOf(storyDressed[i]);
+    if(k >= 0) decor.splice(k, 1);
+  }
+  storyDressed.length = 0;
+}
+var DRESS = {
+  /* the crate: a sign on a post at the lip, at about his head height */
+  sign: function(){
+    dressProp(0x6B4A2A, 0.22, 2.0, 0.22, 5.4, 7.2, 1.4, 0);
+    dressProp(0xE8DCBC, 2.3, 1.0, 0.14, 5.4, 9.0, 1.4, 0);
+    dressProp(0x2A2118, 1.7, 0.16, 0.06, 5.4, 9.2, 1.28, 0);
+    dressProp(0x2A2118, 1.4, 0.16, 0.06, 5.4, 8.85, 1.28, 0);
+  },
+  signgone: function(){ dressProp(0x6B4A2A, 0.22, 2.0, 0.22, 5.4, 7.2, 1.4, 0); },
+  /* the roof: one pigeon, one leg */
+  pigeon: function(){
+    dressProp(0x9AA4B0, 0.55, 0.42, 0.78, 5.2, 1.62, -11.4, 0);
+    dressProp(0x9AA4B0, 0.36, 0.36, 0.36, 5.2, 2.02, -11.75, 0);
+    dressProp(0xE0A030, 0.12, 0.11, 0.24, 5.2, 1.98, -12.02, 0);
+    dressProp(0x2A2118, 0.09, 0.09, 0.09, 5.32, 2.1, -11.95, 0);
+    dressProp(0xE0A030, 0.09, 0.4, 0.09, 5.2, 1.2, -11.4, 0);
+  },
+  /* the bottom floor: the machine, the window, the lift */
+  vending: function(){
+    dressProp(0x2E3742, 2.0, 3.4, 1.0, 10.5, 3.4, 18.4, 0);
+    dressProp(0x7FA8BF, 1.5, 2.1, 0.12, 10.5, 4.3, 17.7, 0);
+    dressProp(0x11151C, 1.6, 0.55, 0.3, 10.5, 1.5, 17.6, 0);
+    dressProp(0xF2F4F8, 0.9, 0.5, 0.05, 10.5, 6.2, 17.7, 0);
+  },
+  crisps: function(){ dressProp(0xF08028, 0.45, 0.62, 0.2, 10.5, 1.7, 17.4, 0.3); },
+  arm: function(){ dressProp(0xD8A050, 0.36, 1.1, 0.36, 10.5, 1.9, 17.4, 0.4); },
+  window: function(){
+    dressProp(0x2E3742, 2.8, 2.0, 0.34, -11.5, 11.2, 20.9, 0);
+    dressProp(0x9FC8E8, 2.3, 1.5, 0.12, -11.5, 11.2, 20.66, 0);
+    dressProp(0xD8A050, 0.95, 0.95, 0.5, -11.5, 11.3, 21.3, 0);
+    dressProp(0xF2F4F8, 0.7, 0.9, 0.06, -10.4, 10.3, 20.6, 0.3);
+  },
+  lift: function(){
+    dressProp(0x5E6A76, 3.0, 5.2, 0.4, 15.5, 2.6, 21.0, 0);
+    dressProp(0x8E99A6, 1.2, 4.4, 0.18, 14.9, 2.2, 20.72, 0);
+    dressProp(0x8E99A6, 1.2, 4.4, 0.18, 16.1, 2.2, 20.72, 0);
+    dressProp(0xFFD34E, 0.22, 0.22, 0.12, 17.3, 3.4, 20.7, 0);
+  },
+  paintdoor2: function(){ dressProp(0x8E4136, 3.2, 5.4, 0.5, -13, 2.7, 21.3, 0); },
+  /* the arena: a single sheet of paper, held with great dignity */
+  letter: function(){ dressProp(0xF2F4F8, 0.85, 1.15, 0.05, -3.9, 4.3, -0.7, 0.2); }
+};
+function storyDress(list){
+  clearDress();
+  if(!list) return;
+  for(var i=0;i<list.length;i++){
+    var fn = DRESS[list[i]];
+    if(fn) fn();
+  }
+}
 function setStoryScene(key){
   if(!key || key === storyScene) return;
   clearBiteChunk();
@@ -5664,6 +5732,7 @@ function setStoryScene(key){
   if(!fn) return;
   storyScene = key;
   fn();
+  storyDressed.length = 0;      /* clearLevel already took them */
 }
 /* ---------- read aloud ---------- */
 var reading = false;
@@ -5735,6 +5804,7 @@ function showStoryNode(key){
   if(!N) return;
   stopSpeech();
   setStoryScene(N.scene);
+  storyDress(N.dress);
   if(storyNoob){
     setDummyFace(storyNoob, N.face || 'smile');
     storyNoob.yaw = Math.PI;
