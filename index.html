@@ -385,9 +385,14 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   background:rgba(21,26,38,.82);border:2px solid rgba(255,255,255,.08);border-radius:11px;padding:8px 14px}
 .can-ammo b{font-family:var(--display);font-size:24px;color:var(--coin);font-variant-numeric:tabular-nums}
 .can-ammo span{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+#canBomb{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:2px;justify-items:center;
+  background:var(--hot);color:#2A0705;border-color:rgba(0,0,0,.2);box-shadow:0 4px 0 #A8322A}
+#canBomb small{font-family:var(--display);font-size:13px;letter-spacing:0}
+#canBomb:disabled{background:var(--ink-2);color:var(--muted);box-shadow:var(--stud-sm);cursor:default}
 #canHelp{position:absolute;left:50%;transform:translateX(-50%);margin:0;
   bottom:calc(18px + env(safe-area-inset-bottom,0px));font-size:12px;font-weight:800;color:#0E2438;
-  background:rgba(255,255,255,.76);padding:7px 14px;border-radius:999px;max-width:min(520px,80vw);text-align:center}
+  background:rgba(255,255,255,.76);padding:7px 14px;border-radius:999px;max-width:min(400px,52vw);text-align:center}
 #canMsg{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-family:var(--display);
   font-size:clamp(20px,5.4vw,34px);color:var(--coin);text-shadow:0 4px 0 rgba(6,10,18,.6);text-align:center;
   white-space:pre-line;line-height:1.22}
@@ -517,7 +522,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v46</div>
+<div id="verTag">v47</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -541,7 +546,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v46</p>
+    <p class="home-ver" id="homeVer">v47</p>
   </div>
 </section>
 
@@ -590,6 +595,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
     <span class="can-lab">down</span>
   </div>
   <div class="can-ammo"><b id="canLeft">5</b><span>noobs left</span></div>
+  <button class="btn" id="canBomb" type="button">Call in bombs<small>$400</small></button>
   <div id="canMsg" hidden></div>
   <p id="canHelp">Drag back from the platform and let go to fling him.</p>
 </div>
@@ -724,7 +730,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <h2 id="helpTitle">How to get rich</h2>
   <p class="sub">Leap off the crate and go limp. Every part your ragdoll smacks pays out &mdash; and every smack x-rays your bones for one second. Hit parts back to back to build a chain multiplier.</p>
   <p class="sub"><b>A Noob's Day Out</b> is a story you steer. He wakes up in the crate with no memory and no plan, and you pick what he does next. The room changes with the scene and he acts out whatever you choose. Eighteen endings, a <b>Read aloud</b> button if you would rather be told it, and <b>Hide</b> if you just want to watch.</p>
-  <p class="sub"><b>Noob Cannon</b> is the one with the tower. Drag back from the launch platform and let go, like a catapult &mdash; a dotted line shows where he will go. Knock down the number of blocks named at the top and the next tower is taller; run out of noobs before you get there and you go back to level one. Take the legs out from under it rather than picking at the top: anything left with nothing underneath comes down on its own, and a falling block takes out whatever it lands across.</p>
+  <p class="sub"><b>Noob Cannon</b> is the one with the tower. Drag back from the launch platform and let go, like a catapult &mdash; a dotted line shows where he will go. Knock down the number of blocks named at the top and the next tower is taller; run out of noobs before you get there and you go back to level one. If a tower is beating you, <b>Call in bombs</b> spends $400 on four of them falling out of the sky onto it, and costs you no noobs. Take the legs out from under it rather than picking at the top: anything left with nothing underneath comes down on its own, and a falling block takes out whatever it lands across.</p>
   <p class="sub"><b>Last Noob Standing</b> is the first-person one. Pick who you are fighting from a roster of noobs with made-up names and a skill rating out of 99 &mdash; the rating is real, and it drives how fast they move, how straight they shoot and how much they can take. The <b>Triple mode</b> button at the bottom deals out six of them instead of three and lets you take on three at once for half as much again. In the pit: <kbd>W A S D</kbd> to walk, move the mouse to look, click to shoot. On a tablet a thumbstick appears wherever your left thumb lands and walks you, dragging the right of the screen looks around, and the red button fires. Knives, pistols, SMGs, shotguns and rifles lie about on the sand &mdash; walk over one to pick it up, and they come back a few seconds after somebody takes them. You start with your fists. Headshots pay double and often take the head clean off.</p>
   <p class="sub"><b>Colosseum</b> pits two noobs against each other. Pick a weapon and armour for each &mdash; sword, axe, spear or club, bare, leather or iron &mdash; then set them loose. They walk each other down and swing until one of them stops getting up. The winner pays out.</p>
   <p class="sub"><b>Slice Lab</b> is the other mode on the home screen: a room of loose noobs, no falling required. Pick <b>Sword</b> and the cursor becomes a blade &mdash; click or drag across a noob and it takes the arm or leg clean off for cash, with a bonus when all four are gone. Pick <b>Grab</b> to drag one around by whatever you clicked, then slam it into the floor or a wall &mdash; hard landings hurt and pay out, and a really heavy one rips a limb off. They haul themselves back up between hits &mdash; hips under them first, then the trunk, then the head &mdash; so there is always something standing to swing at. Once two limbs are off they stop smiling about it. Go for the <b>head</b> or cut them clean through the <b>torso</b> for the big money &mdash; either one finishes them. The camera sits still and the room is a plain box, so you can swing from anywhere on the screen and sweep straight through them. <b>New noob</b> drops another one in.</p>
@@ -4356,8 +4362,20 @@ function canTopUnder(b, x, ceiling){
   }
   return top;
 }
+/* Standing is a reflex he keeps trying even as the floor leaves: the posture
+   spring holds him bolt upright while the tower falls away underneath. Once
+   anything near him gives way he stops trying. */
+function canLimpNear(x, y){
+  for(var i=0;i<cannonNpcs.length;i++){
+    var d = cannonNpcs[i];
+    if(d.noStand) continue;
+    var h = d.P[HIP];
+    if(Math.abs(h.x - x) < 7 && Math.abs(h.y - y) < 7) d.noStand = true;
+  }
+}
 function canTopple(b, vx, vy, spin){
   if(!b.down){
+    canLimpNear(b.x, b.y);
     b.down = true;
     b.part.broken = true;               /* the collision loop skips it from here */
     cannonDown++;
@@ -4456,6 +4474,96 @@ function canStepBlocks(dt){
     b.mesh.rotation.set(0, 0, b.rz);
   }
 }
+/* ---------- calling in the bombs ---------- */
+var cannonBombs = [], BOMB_COST = 400;
+var bombMat = new THREE.MeshLambertMaterial({ color:0x2A2E36, emissive:0x0A0C10 });
+var bombFin = new THREE.MeshLambertMaterial({ color:0x8E3A32 });
+function canClearBombs(){
+  for(var i=0;i<cannonBombs.length;i++) scene.remove(cannonBombs[i].mesh);
+  cannonBombs.length = 0;
+}
+function canMakeBomb(x, y){
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(dropGeo, bombMat);
+  body.scale.set(0.85, 1.5, 0.85);
+  g.add(body);
+  var fin = new THREE.Mesh(boxGeo, bombFin);
+  fin.scale.set(0.12, 0.7, 0.7); fin.position.y = -0.85;
+  g.add(fin);
+  g.position.set(x, y, 0);
+  scene.add(g);
+  cannonBombs.push({ mesh:g, x:x, y:y, vy:-2 });
+}
+function canBoom(x, y){
+  sfx.smash();
+  shake = Math.min(shake + 0.9, 1.4);
+  var R = 7;
+  for(var k=0;k<cannonBlocks.length;k++){
+    var q = cannonBlocks[k];
+    if(q.down) continue;
+    var dx = q.x - x, dy = q.y - y;
+    var d = Math.sqrt(dx*dx + dy*dy);
+    if(d > R) continue;
+    var push = (1 - d / R) * 17;
+    var nx = d < 0.1 ? 0 : dx / d, ny = d < 0.1 ? 1 : dy / d;
+    canTopple(q, nx * push, Math.max(0, ny) * push * 0.5, nx * 3.5);
+  }
+  /* and it throws whoever was in there about */
+  for(var p=0;p<cannonNpcs.length;p++){
+    var nd = cannonNpcs[p], h = nd.P[HIP];
+    var ex = h.x - x, ey = h.y - y;
+    var ed = Math.sqrt(ex*ex + ey*ey);
+    if(ed > R + 3) continue;
+    nd.noStand = true;
+    var f = (1 - Math.min(1, ed / (R + 3))) * 26;
+    for(var j=0;j<NJ;j++){
+      nd.P[j].px -= (ed < 0.1 ? 0 : ex / ed) * f * FIXED;
+      nd.P[j].py -= (ed < 0.1 ? 1 : Math.max(0.3, ey / ed)) * f * FIXED;
+    }
+  }
+  for(var sp=0; sp<16; sp++){
+    var a = Math.random() * Math.PI * 2;
+    spawnShard(x, y, 0, Math.cos(a)*9, 3 + Math.random()*8, Math.sin(a)*3,
+               0.1 + Math.random()*0.12, shardMat);
+  }
+  addPop('BOOM', x, y + 1.5, 0, true);
+}
+function canStepBombs(dt){
+  for(var i=cannonBombs.length-1;i>=0;i--){
+    var b = cannonBombs[i];
+    b.vy += G * dt * 0.6;              /* slowed a touch so you see them come */
+    b.y += b.vy * dt;
+    b.mesh.position.y = b.y;
+    var hit = b.y <= 0.6;
+    if(!hit){
+      for(var k=0;k<cannonBlocks.length;k++){
+        var q = cannonBlocks[k];
+        if(q.down) continue;
+        if(Math.abs(b.x - q.x) < q.hx + 0.7 && Math.abs(b.y - q.y) < q.hy + 0.7){ hit = true; break; }
+      }
+    }
+    if(hit){
+      canBoom(b.x, b.y);
+      scene.remove(b.mesh);
+      cannonBombs.splice(i, 1);
+    }
+  }
+}
+function canBuyBombs(){
+  if(gameMode !== 'cannon' || cannonState !== 'aim') return;
+  if(save.money < BOMB_COST){ sfx.nope(); canMsg('You need $' + BOMB_COST, 1.6); return; }
+  save.money -= BOMB_COST; persist();
+  sfx.buy();
+  canHideDots();
+  for(var i=0;i<4;i++){
+    canMakeBomb(CAN_TOWER_X + (i - 1.5) * 3.4 + (Math.random()-0.5)*1.6,
+                cannonTopY + 22 + i * 7);
+  }
+  cannonState = 'fly';
+  cannonSettle = 0;
+  canMsg('BOMBS AWAY', 1.8);
+  canPaintHud();
+}
 /* ---------- aiming and launching ---------- */
 var canDotMat = new THREE.MeshBasicMaterial({ color:0xFFFFFF, fog:false, transparent:true, opacity:0.75 });
 function canMakeDots(){
@@ -4551,6 +4659,8 @@ function canPaintHud(){
   $('canLevel').textContent = 'Level ' + cannonLevel;
   $('canDown').textContent = cannonDown + ' / ' + cannonTarget;
   $('canLeft').textContent = cannonLeft;
+  var bomb = $('canBomb');
+  bomb.disabled = cannonState !== 'aim' || save.money < BOMB_COST;
   var pct = cannonTarget ? Math.min(100, cannonDown / cannonTarget * 100) : 0;
   $('canFill').style.width = pct + '%';
 }
@@ -4582,6 +4692,7 @@ function canStartLevel(){
   canClearNoobs();
   canClearQueue();
   canClearNpcs();
+  canClearBombs();
   canHideDots();
   cannonDown = 0;
   cannonLeft = cannonMax = Math.max(3, 6 - Math.floor((cannonLevel - 1) / 2));
@@ -4685,6 +4796,7 @@ function stepCannon(dt){
     acc -= FIXED; n++;
   }
   if(n === 6) acc = 0;
+  canStepBombs(dt);
   canStepBlocks(dt);
   for(var d=0;d<dummies.length;d++){
     bleedStumps(dummies[d], dt);
@@ -4701,7 +4813,7 @@ function stepCannon(dt){
       }
       still = (v / FIXED) < 9;
     }
-    var settling = false;
+    var settling = cannonBombs.length > 0;
     for(var b=0;b<cannonBlocks.length;b++){
       var q = cannonBlocks[b];
       if(Math.abs(q.vx) + Math.abs(q.vy) + Math.abs(q.w) > 1.2){ settling = true; break; }
@@ -5935,6 +6047,7 @@ $('modeArena').addEventListener('click', function(){ sfx.wake(); startArena(); }
 $('modeStory').addEventListener('click', function(){ sfx.wake(); startStory(); });
 $('modeFps').addEventListener('click', function(){ sfx.wake(); startFps(); });
 $('modeCannon').addEventListener('click', function(){ sfx.wake(); startCannon(); });
+$('canBomb').addEventListener('click', function(){ sfx.wake(); canBuyBombs(); });
 $('fpsGo').addEventListener('click', function(){ sfx.wake(); fpsBegin(); });
 window.addEventListener('focus', function(){ if(gameMode === 'fps' && fpsState === 'fight') fpsGrabKeys(); });
 $('fpsHome').addEventListener('click', function(){ sfx.wake(); showHome(); });
