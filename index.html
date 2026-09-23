@@ -387,6 +387,9 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
 .can-ammo span{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
 #canBomb{position:absolute;right:calc(14px + env(safe-area-inset-right,0px));
   bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:2px;justify-items:center;
+  /* the hud above is click-through so it never eats an aiming drag; this is the
+     one thing on it you are meant to be able to press */
+  pointer-events:auto;
   background:var(--hot);color:#2A0705;border-color:rgba(0,0,0,.2);box-shadow:0 4px 0 #A8322A}
 #canBomb small{font-family:var(--display);font-size:13px;letter-spacing:0}
 #canBomb:disabled{background:var(--ink-2);color:var(--muted);box-shadow:var(--stud-sm);cursor:default}
@@ -522,7 +525,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
   <button class="btn tool" id="toolSpawn" type="button">New noob</button>
 </div>
 
-<div id="verTag">v47</div>
+<div id="verTag">v48</div>
 <section id="homeScreen" aria-labelledby="homeTitle">
   <div class="home-card">
     <p class="home-eyebrow">Ragdoll</p>
@@ -546,7 +549,7 @@ body.mode-slice.tool-grab #stage canvas:active{cursor:grabbing}
       <button class="btn" id="homeSettings" type="button">Settings</button>
       <button class="btn" id="homeHelp" type="button">How</button>
     </div>
-    <p class="home-ver" id="homeVer">v47</p>
+    <p class="home-ver" id="homeVer">v48</p>
   </div>
 </section>
 
@@ -1504,7 +1507,7 @@ function spawnShard(x,y,z,vx,vy,vz,size,mat){
   var m = new THREE.Mesh(blood ? dropGeo : boxGeo, blood ? dropMat : (mat || shardMat));
   m.position.set(x,y,z);
   /* a droplet is a droplet from any angle; splinters stay splintery */
-  if(blood) m.scale.setScalar(size * 0.5);
+  if(blood) m.scale.setScalar(size * 0.35);
   else m.scale.set(size*0.9, size*1.7, size*0.5);
   scene.add(m);
   shards.push({ mesh:m, vx:vx, vy:vy, vz:vz, life:1.2 + Math.random()*1.1, base:size,
@@ -1609,7 +1612,7 @@ var bloodMat = new THREE.MeshLambertMaterial({ color:0xA0170F, emissive:0x2C0604
 var dropMat = new THREE.MeshLambertMaterial({ color:0xB81C12, emissive:0x3A0806,
                                               transparent:true, opacity:0.7 });
 var dropGeo = new THREE.SphereGeometry(0.5, 8, 6);
-var stumpGeo = new THREE.SphereGeometry(0.42, 10, 7);
+var stumpGeo = new THREE.SphereGeometry(0.30, 10, 7);   /* just covers the cut, no more */
 var LIMB_PARTS = [
   { mesh:mArmL, a:SHL, b:HDL, w:0.72, d:0.80, pad:0.82, mat:matArm, bone:3, cutPad:0.41, cutShift:-0.205, freePad:0.41, freeShift:0.205 },
   { mesh:mArmR, a:SHR, b:HDR, w:0.72, d:0.80, pad:0.82, mat:matArm, bone:4, cutPad:0.41, cutShift:-0.205, freePad:0.41, freeShift:0.205 },
